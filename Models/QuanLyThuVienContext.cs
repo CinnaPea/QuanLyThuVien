@@ -37,9 +37,13 @@ public partial class QuanLyThuVienContext : DbContext
 
     public virtual DbSet<TacGium> TacGia { get; set; }
 
+    public virtual DbSet<TaiKhoan> TaiKhoans { get; set; }
+
     public virtual DbSet<ThanhToanPhat> ThanhToanPhats { get; set; }
 
     public virtual DbSet<TheLoai> TheLoais { get; set; }
+
+    public virtual DbSet<VaiTro> VaiTros { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -237,6 +241,28 @@ public partial class QuanLyThuVienContext : DbContext
             entity.Property(e => e.TenTacGia).HasMaxLength(150);
         });
 
+        modelBuilder.Entity<TaiKhoan>(entity =>
+        {
+            entity.HasKey(e => e.TaiKhoanId).HasName("PK__TaiKhoan__9A124B453119AB95");
+
+            entity.ToTable("TaiKhoan");
+
+            entity.HasIndex(e => e.TenDangNhap, "UQ__TaiKhoan__55F68FC080DE418F").IsUnique();
+
+            entity.Property(e => e.MatKhauHash).HasMaxLength(64);
+            entity.Property(e => e.TenDangNhap).HasMaxLength(50);
+            entity.Property(e => e.TrangThai).HasDefaultValue(true);
+
+            entity.HasOne(d => d.DocGia).WithMany(p => p.TaiKhoans)
+                .HasForeignKey(d => d.DocGiaId)
+                .HasConstraintName("FK_TaiKhoan_DocGia");
+
+            entity.HasOne(d => d.VaiTro).WithMany(p => p.TaiKhoans)
+                .HasForeignKey(d => d.VaiTroId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TaiKhoan_VaiTro");
+        });
+
         modelBuilder.Entity<ThanhToanPhat>(entity =>
         {
             entity.HasKey(e => e.ThanhToanPhatId).HasName("PK__ThanhToa__64EA6A2C9CA4FFC4");
@@ -261,6 +287,17 @@ public partial class QuanLyThuVienContext : DbContext
 
             entity.Property(e => e.MoTa).HasMaxLength(500);
             entity.Property(e => e.TenTheLoai).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<VaiTro>(entity =>
+        {
+            entity.HasKey(e => e.VaiTroId).HasName("PK__VaiTro__477581160769E3FB");
+
+            entity.ToTable("VaiTro");
+
+            entity.HasIndex(e => e.TenVaiTro, "UQ__VaiTro__1DA55814CBA45A45").IsUnique();
+
+            entity.Property(e => e.TenVaiTro).HasMaxLength(20);
         });
 
         OnModelCreatingPartial(modelBuilder);

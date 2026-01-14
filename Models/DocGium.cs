@@ -22,4 +22,6 @@ public partial class DocGium
     public bool TrangThai { get; set; }
 
     public virtual ICollection<PhieuMuon> PhieuMuons { get; set; } = new List<PhieuMuon>();
+
+    public virtual ICollection<TaiKhoan> TaiKhoans { get; set; } = new List<TaiKhoan>();
 }
