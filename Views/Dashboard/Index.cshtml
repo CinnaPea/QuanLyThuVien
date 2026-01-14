@@ -1,0 +1,82 @@
+﻿@model WebApplication1.VMs.DashboardVM
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+</head>
+<body class="px-4 py-4">
+    <div class="container-fluid">
+
+        <h1 class="dashboard-title mb-4">📊 Admin Dashboard</h1>
+
+        <!-- STAT CARDS -->
+        <div class="row g-4">
+
+            <div class="col-xl-3 col-md-6 px-2">
+                <div class="stat-card bg-gradient-primary p-4">
+                    <div class="stat-card-content">
+                        <div class="stat-label">TỔNG SỐ SÁCH</div>
+                        <div class="stat-value">@Model.TongSach</div>
+                    </div>
+                    <div class="stat-icon">📚</div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 px-2">
+                <div class="stat-card bg-gradient-info p-4">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Sách đang mượn</div>
+                        <div class="stat-value">@Model.SachDangMuon</div>
+                    </div>
+                    <div class="stat-icon">📖</div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 px-2">
+                <div class="stat-card bg-gradient-warning p-4">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Phiếu mượn quá hạn</div>
+                        <div class="stat-value">@Model.PhieuMuonQuaHan</div>
+                    </div>
+                    <div class="stat-icon">⏰</div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 px-2">
+                <div class="stat-card bg-gradient-success p-4">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Độc giả hoạt động</div>
+                        <div class="stat-value">@Model.DocGiaDangHoatDong</div>
+                    </div>
+                    <div class="stat-icon">👤</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MONEY / FINE SUMMARY -->
+        <div class="row mt-5">
+            <div class="col-lg-6 col-md-8">
+                <div class="money-card shadow-sm">
+                    <div class="money-content">
+                        <div class="money-title">TIỀN PHẠT CHƯA THANH TOÁN</div>
+
+                        <div class="money-value">
+                            @Model.TongTienPhatChuaThanhToan.ToString("N0") ₫
+                        </div>
+
+                        <div class="money-sub">
+                            Tổng số tiền phạt hiện tại chưa được thanh toán trong hệ thống
+                        </div>
+                    </div>
+
+                    <div class="money-icon">💰</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

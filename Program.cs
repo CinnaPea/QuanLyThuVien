@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using WebApplication1.Models;
+using WebApplication1.Services.Implementations;
+using WebApplication1.Services.Interfaces;
+
 namespace WebApplication1
 {
     public class Program
@@ -5,8 +10,11 @@ namespace WebApplication1
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<QuanLyThuVienContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Add services to the container.
+            builder.Services.AddScoped<IDashboardService, DashboardService>();
+
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
@@ -33,7 +41,7 @@ namespace WebApplication1
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
             app.Run();
             

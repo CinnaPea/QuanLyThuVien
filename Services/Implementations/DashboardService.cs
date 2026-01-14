@@ -19,26 +19,30 @@ namespace WebApplication1.Services.Implementations
         public int SachDangMuon()
             => _context.CtPhieuMuons
                 .Count(ctm =>
-                    !_context.CtPhieuTras.Any(ctt => ctt.SachId == ctm.SachId));
+                    !_context.PhieuTras
+                        .Any(pt => pt.PhieuMuonId == ctm.PhieuMuonId));
 
         public int PhieuMuonQuaHan()
         {
             var today = DateOnly.FromDayNumber(DateTime.Today.Day);
 
             return _context.PhieuMuons
-                .Count(pm => pm.TrangThai == "Active" && pm.HanTra < today);
+                .Count(pm => pm.HanTra < today);
         }
 
         public int DocGiaDangHoatDong()
             => _context.DocGia.Count(dg => dg.TrangThai);
-
         public decimal TongTienPhatChuaThanhToan()
-            => _context.Phats
-                .Sum(p =>
-                    p.SoTien -
-                    _context.ThanhToanPhats
-                        .Where(t => t.PhatId == p.PhatId)
-                        .Sum(t => t.SoTien));
+        {
+            var tongPhat = _context.Phats
+                .Sum(p => (decimal?)p.SoTien) ?? 0;
+
+            var tongDaTra = _context.ThanhToanPhats
+                .Sum(t => (decimal?)t.SoTien) ?? 0;
+
+            return tongPhat - tongDaTra;
+        }
 
     }
+
 }

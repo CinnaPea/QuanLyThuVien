@@ -1,0 +1,121 @@
+﻿
+.dashboard-title {
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+
+.stat-card {
+    border-radius: 18px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease;
+    margin-bottom: 12px;
+    min-height: 150px;
+}
+
+.stat-card-content {
+    padding: 28px 28px 32px 28px; /* 👈 safe padding */
+}
+
+.stat-label {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+}
+
+.stat-value {
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-top: 6px;
+}
+
+.stat-icon {
+    position: absolute;
+    right: 18px;
+    bottom: 10px;
+    font-size: 64px;
+    opacity: 0.22;
+    pointer-events: none;
+}
+
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,.15);
+    }
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #4e73df, #224abe);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #36b9cc, #117a8b);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f6c23e, #dda20a);
+    color: #212529;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #1cc88a, #0f6848);
+}
+
+.money-card {
+    position: relative;
+    border-radius: 20px;
+    border: none;
+    background: linear-gradient(135deg, #fff5f5, #ffe3e3);
+    overflow: hidden;
+}
+
+    .money-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 6px;
+        height: 100%;
+        background: linear-gradient(180deg, #dc3545, #a71d2a);
+    }
+
+.money-content {
+    padding: 28px 32px;
+}
+
+.money-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #a71d2a;
+}
+
+.money-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #dc3545;
+    margin: 10px 0;
+}
+
+.money-icon {
+    position: absolute;
+    right: 20px;
+    bottom: 12px;
+    font-size: 64px;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.money-sub {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+
+.subtle-text {
+    font-size: .9rem;
+    color: #6c757d;
+}

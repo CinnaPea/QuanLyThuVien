@@ -20,3 +20,54 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+
+body {
+    overflow-x: hidden;
+}
+
+/* HEADER INSIDE BODY */
+.admin-header {
+    height: 64px;
+    background: #212529;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+
+    .admin-header .brand {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .admin-header .header-actions {
+        margin-left: auto;
+    }
+
+/* SIDEBAR */
+#colorlib-aside {
+    z-index: 1100;
+}
+/* MAIN CONTENT */
+#colorlib-main {
+    margin-left: 300px;
+    padding: 24px;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+
+/* MOBILE */
+@media(max-width: 768px) {
+    .admin-header {
+        left: 0;
+    }
+
+    #colorlib-main {
+        margin-left: 0;
+    }
+}
