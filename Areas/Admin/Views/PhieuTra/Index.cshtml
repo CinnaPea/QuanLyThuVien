@@ -6,6 +6,129 @@
 }
 
 <style>
+    /* =========================
+           Admin CRUD Page (DauSach)
+           ========================= */
+    .admin-page {
+        padding: 10px 0 30px;
+    }
+
+    .admin-toolbar {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 8px 0 14px;
+        flex-wrap: wrap;
+    }
+
+    .admin-title {
+        margin: 0;
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: .2px;
+    }
+
+    .admin-subtitle {
+        margin-top: 6px;
+        color: rgba(0,0,0,.55);
+        font-size: 13px;
+    }
+
+    .admin-btn {
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 600;
+    }
+
+    .admin-btn__icon {
+        display: inline-block;
+        margin-right: 6px;
+        font-weight: 900;
+        transform: translateY(-1px);
+    }
+
+    .admin-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,.08);
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.06);
+        overflow: hidden;
+    }
+
+    .admin-card__body {
+        padding: 0;
+    }
+
+    .admin-table {
+        margin: 0;
+    }
+
+        .admin-table thead th {
+            background: rgba(0,0,0,.03);
+            border-bottom: 1px solid rgba(0,0,0,.08) !important;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            padding: 14px 12px !important;
+            white-space: nowrap;
+        }
+
+        .admin-table tbody td {
+            padding: 14px 12px !important;
+            vertical-align: middle !important;
+        }
+
+    .admin-title-cell__name {
+        font-weight: 700;
+        line-height: 1.25;
+    }
+
+    .admin-mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 12.5px;
+    }
+
+    .admin-muted {
+        color: rgba(0,0,0,.45);
+    }
+
+    .admin-pill {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(0,0,0,.06);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .admin-pill--soft {
+        background: rgba(255,195,0,.18); /* “corporate gold” */
+    }
+
+    .admin-pill--isbn {
+        background: rgba(0,0,0,.08);
+    }
+
+    .admin-action-btn {
+        border-radius: 10px;
+        padding: 7px 10px;
+        font-weight: 700;
+    }
+
+    .admin-inline-form {
+        display: inline-block;
+        margin: 0 0 0 6px;
+    }
+
+    .admin-empty {
+        text-align: center;
+        padding: 28px 12px !important;
+        color: rgba(0,0,0,.55);
+        background: #fff;
+    }
     /* ===== Returns / PhieuTra extras ===== */
     .admin-alert {
         border-radius: 12px;
