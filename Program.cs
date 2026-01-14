@@ -1,42 +1,55 @@
-namespace WebApplication1
+﻿using WebApplication1.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<QuanLyThuVienContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Debug chuỗi kết nối thật sự
+var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine(">>> DefaultConnection = " + (cs ?? "NULL"));
+
+builder.Services.AddSession(o =>
 {
-    public class Program
+    o.IdleTimeout = TimeSpan.FromMinutes(60);
+    o.Cookie.HttpOnly = true;
+    o.Cookie.IsEssential = true;
+});
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(o =>
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+        o.LoginPath = "/Account/Login";
+        o.AccessDeniedPath = "/Account/AccessDenied";
+    });
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews();
+builder.Services.AddAuthorization(o =>
+{
+    o.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
+});
 
-            var app = builder.Build();
+var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+app.UseRouting();
 
-            app.UseRouting();
+app.UseSession();
+app.UseAuthentication();
+app.UseAuthorization();
 
-            app.UseAuthorization();
+app.MapAreaControllerRoute(
+    name: "Admin",
+    areaName: "Admin",
+    pattern: "Admin/{controller=Admin}/{action=Index}/{id?}");
 
-            app.MapAreaControllerRoute(
-                name: "Admin",
-                areaName: "Admin",
-                pattern: "Admin/{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
-
-            app.Run();
-            
-        }
-    }
-}
+app.Run();

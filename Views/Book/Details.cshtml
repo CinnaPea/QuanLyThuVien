@@ -1,0 +1,46 @@
+﻿@model DauSach
+@{
+    var sachCon = ViewBag.SachCon as List<Sach> ?? new();
+}
+
+<h2>@Model.TieuDe</h2>
+<p>ISBN: @Model.Isbn</p>
+<p>Thể loại: @Model.TheLoai?.TenTheLoai</p>
+<p>NXB: @Model.NhaXuatBan?.TenNxb
+
+@if (TempData["err"] != null)
+{
+     <div style="color:red">@TempData["err"]</div>
+}
+@if (TempData["ok"] != null)
+{
+     <div style="color:green">@TempData["ok"]</div>
+}
+
+<h3>Bản sao còn trong thư viện</h3>
+
+@if (!sachCon.Any())
+{
+    <p><i>Hết bản sao để mượn.</i></p>
+}
+else
+{
+    <table border="1" cellpadding="6">
+        <tr><th>Mã sách</th><th>Vị trí</th><th></th></tr>
+        @foreach (var s in sachCon)
+        {
+            <tr>
+                <td>@s.SachId</td>
+                <td>@s.ViTriKe</td>
+                <td>
+                    <form asp-controller="Borrow" asp-action="AddToCart" method="post">
+                        <input type="hidden" name="sachId" value="@s.SachId" />
+                        <button type="submit">Thêm vào giỏ</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+<p><a asp-controller="Borrow" asp-action="Cart">Xem giỏ mượn</a></p>

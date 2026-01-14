@@ -1,0 +1,46 @@
+﻿@model WebApplication1.Models.PhieuMuon 
+@{
+    var ct = ViewBag.CT as List<WebApplication1.Models.CtPhieuMuon> ?? new();
+}
+<h2>Chi tiết phiếu mượn #@Model.PhieuMuonId</h2>
+
+@if (TempData["err"] != null)
+{
+     <div style="color:red">@TempData["err"]</div>
+}
+@if (TempData["ok"] != null)
+{
+     <div style="color:green">@TempData["ok"]</div>
+}
+
+<p>Độc giả: @Model.DocGia?.HoTen</p>
+<p>Ngày mượn: @Model.NgayMuon</p>
+<p>Hạn trả: @Model.HanTra</p>
+<p>Trạng thái: @Model.TrangThai</p>
+
+<h3>Sách trong phiếu</h3>
+<table border="1" cellpadding="6">
+    <tr><th>Mã sách</th><th>Đầu sách</th><th>Tình trạng lúc mượn</th></tr>
+    @foreach (var x in ct)
+    {
+        <tr>
+            <td>@x.SachId</td>
+            <td>@x.Sach?.DauSach?.TieuDe</td>
+            <td>@x.TinhTrangLucMuon</td>
+        </tr>
+    }
+</table>
+
+<form method="post" asp-action="Approve">
+    <input type="hidden" name="id" value="@Model.PhieuMuonId" />
+    <label>Số ngày mượn</label>
+    <input name="soNgayMuon" value="7" />
+    <button type="submit">Duyệt & Giao sách</button>
+</form>
+
+<form method="post" asp-action="Reject">
+    <input type="hidden" name="id" value="@Model.PhieuMuonId" />
+    <label>Ghi chú</label>
+    <input name="ghiChu" />
+    <button type="submit">Từ chối</button>
+</form>

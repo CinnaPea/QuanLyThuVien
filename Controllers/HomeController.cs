@@ -1,32 +1,26 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebApplication1;
 
-namespace WebApplication1.Controllers
+namespace LibraryManagement.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly QuanLyThuVienContext _db;
+        public HomeController(QuanLyThuVienContext db) => _db = db;
 
-        public HomeController(ILogger<HomeController> logger)
+        public async Task<IActionResult> Index(string? q = null)
         {
-            _logger = logger;
-        }
+            var query = _db.DauSaches
+                .Include(x => x.TheLoai)
+                .Include(x => x.NhaXuatBan)
+                .AsQueryable();
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+            if (!string.IsNullOrWhiteSpace(q))
+                query = query.Where(x => x.TieuDe.Contains(q) || (x.Isbn != null && x.Isbn.Contains(q)));
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(await query.OrderBy(x => x.TieuDe).ToListAsync());
         }
     }
 }

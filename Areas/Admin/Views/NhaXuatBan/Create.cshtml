@@ -1,0 +1,21 @@
+﻿@model WebApplication1.Models.NhaXuatBan
+<h2>Thêm nhà xuất bản</h2>
+
+<form method="post">
+    <div>
+        <label>Tên NXB</label>
+        <input asp-for="TenNxb" />
+    </div>
+
+    <div>
+        <label>Địa chỉ</label>
+        <input asp-for="DiaChi" />
+    </div>
+
+    <div>
+        <label>Điện thoại</label>
+        <input asp-for="DienThoai" />
+    </div>
+
+    <button type="submit">Lưu</button>
+</form>

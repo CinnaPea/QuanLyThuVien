@@ -24,4 +24,7 @@ public partial class PhieuMuon
     public virtual ICollection<Phat> Phats { get; set; } = new List<Phat>();
 
     public virtual ICollection<PhieuTra> PhieuTras { get; set; } = new List<PhieuTra>();
+
+   
+    
 }

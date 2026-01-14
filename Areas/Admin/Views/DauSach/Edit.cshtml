@@ -1,0 +1,43 @@
+﻿@model WebApplication1.Models.DauSach
+<h2>Sửa đầu sách</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="DauSachId" />
+
+    <div>
+        <label>Tiêu đề</label>
+        <input asp-for="TieuDe" />
+    </div>
+
+    <div>
+        <label>ISBN</label>
+        <input asp-for="Isbn" />
+    </div>
+
+    <div>
+        <label>Năm xuất bản</label>
+        <input asp-for="NamXuatBan" />
+    </div>
+
+    <div>
+        <label>Ngôn ngữ</label>
+        <input asp-for="NgonNgu" />
+    </div>
+
+    <div>
+        <label>Thể loại</label>
+        <select asp-for="TheLoaiId" asp-items="ViewBag.TheLoaiId"></select>
+    </div>
+
+    <div>
+        <label>Nhà xuất bản</label>
+        <select asp-for="NhaXuatBanId" asp-items="ViewBag.NhaXuatBanId"></select>
+    </div>
+
+    <div>
+        <label>Mô tả</label>
+        <textarea asp-for="MoTa" rows="4"></textarea>
+    </div>
+
+    <button type="submit">Lưu</button>
+</form>

@@ -1,0 +1,18 @@
+﻿@model List<WebApplication1.Models.Phat>
+<h2>Danh sách phạt</h2>
+
+<table border="1" cellpadding="6">
+    <tr><th>Mã</th><th>Phiếu mượn</th><th>Sách</th><th>Lý do</th><th>Số tiền</th><th>Đã TT</th><th></th></tr>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.PhatId</td>
+            <td>@p.PhieuMuonId</td>
+            <td>@p.SachId</td>
+            <td>@p.LyDo</td>
+            <td>@p.SoTien</td>
+            <td>@p.DaThanhToan</td>
+            <td><a asp-action="Details" asp-route-id="@p.PhatId">Chi tiết</a></td>
+        </tr>
+    }
+</table>

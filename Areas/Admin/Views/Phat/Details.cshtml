@@ -1,0 +1,38 @@
+﻿@model WebApplication1.Models.Phat
+@{
+    var pays = ViewBag.Payments as List<WebApplication1.Models.ThanhToanPhat> ?? new();
+}
+<h2>Phạt #@Model.PhatId</h2>
+
+@if (TempData["err"] != null)
+{
+     <div style="color:red">@TempData["err"]</div>
+}
+
+<p>Phiếu mượn: @Model.PhieuMuonId</p>
+<p>Sách: @Model.SachId</p>
+<p>Lý do: @Model.LyDo</p>
+<p>Số tiền: @Model.SoTien</p>
+<p>Đã thanh toán: @Model.DaThanhToan</p>
+
+<h3>Thanh toán</h3>
+<form method="post" asp-action="Pay">
+    <input type="hidden" name="phatId" value="@Model.PhatId" />
+    <label>Số tiền</label>
+    <input name="soTien" />
+    <button type="submit">Ghi nhận thanh toán</button>
+</form>
+
+<h3>Lịch sử thanh toán</h3>
+<table border="1" cellpadding="6">
+    <tr><th>Mã</th><th>Số tiền</th><th>Ngày</th><th>Ghi chú</th></tr>
+    @foreach (var x in pays)
+    {
+        <tr>
+            <td>@x.ThanhToanPhatId</td>
+            <td>@x.SoTien</td>
+            <td>@x.NgayThanhToan</td>
+            <td>@x.GhiChu</td>
+        </tr>
+    }
+</table>

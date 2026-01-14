@@ -15,9 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Admin\Models\" />
-    <Folder Include="Areas\Admin\Views\" />
-    <Folder Include="Models\" />
+    <Folder Include="Areas\Admin\Models\NewFolder\" />
   </ItemGroup>
 
 </Project>
