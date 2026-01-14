@@ -1,8 +1,31 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model List<DauSach>
+<h2>Thư viện online</h2>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<form method="get">
+    <input name="q" value="@Context.Request.Query["q"]" placeholder="Tìm theo tên / ISBN" />
+    <button type="submit">Tìm</button>
+</form>
+
+<p>
+    <a asp-controller="Borrow" asp-action="Cart">Giỏ mượn</a> |
+    <a asp-controller="Borrow" asp-action="MyBorrows">Phiếu mượn của tôi</a> |
+    <a asp-controller="Fine" asp-action="MyFines">Phạt của tôi</a>
+</p>
+
+<table border="1" cellpadding="6">
+    <tr>
+        <th>Tiêu đề</th>
+        <th>Thể loại</th>
+        <th>NXB</th>
+        <th></th>
+    </tr>
+    @foreach (var ds in Model)
+    {
+        <tr>
+            <td>@ds.TieuDe</td>
+            <td>@ds.TheLoai?.TenTheLoai</td>
+            <td>@ds.NhaXuatBan?.TenNxb</td>
+            <td><a asp-controller="Books" asp-action="Details" asp-route-id="@ds.DauSachId">Xem</a></td>
+        </tr>
+    }
+</table>

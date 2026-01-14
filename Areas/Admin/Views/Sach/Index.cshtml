@@ -1,0 +1,37 @@
+﻿@model List<WebApplication1.Models.Sach>
+<h2>Sách (bản sao)</h2>
+
+<p><a asp-action="Create">Thêm sách bản sao</a></p>
+
+<table border="1" cellpadding="6">
+    <tr>
+        <th>ID</th>
+        <th>Đầu sách</th>
+        <th>Mã vạch</th>
+        <th>Vị trí kệ</th>
+        <th>Ngày nhập</th>
+        <th>Tình trạng</th>
+        <th>Ghi chú</th>
+        <th></th>
+    </tr>
+
+    @foreach (var x in Model)
+    {
+        <tr>
+            <td>@x.SachId</td>
+            <td>@x.DauSach?.TieuDe</td>
+            <td>@x.MaVach</td>
+            <td>@x.ViTriKe</td>
+            <td>@x.NgayNhap</td>
+            <td>@x.TinhTrang</td>
+            <td>@x.GhiChu</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@x.SachId">Sửa</a>
+                <form asp-action="Delete" method="post" style="display:inline">
+                    <input type="hidden" name="id" value="@x.SachId" />
+                    <button type="submit">Xoá</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>

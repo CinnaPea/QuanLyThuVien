@@ -1,0 +1,17 @@
+﻿@model List<PhieuMuon>
+
+<h2>Phiếu mượn của tôi</h2>
+
+<table border="1" cellpadding="6">
+    <tr><th>Mã</th><th>Ngày mượn</th><th>Hạn trả</th><th>Trạng thái</th><th>Ghi chú</th></tr>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.PhieuMuonId</td>
+            <td>@p.NgayMuon</td>
+            <td>@p.HanTra</td>
+            <td>@p.TrangThai</td>
+            <td>@p.GhiChu</td>
+        </tr>
+    }
+</table>

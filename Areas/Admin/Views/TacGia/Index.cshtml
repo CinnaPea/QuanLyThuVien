@@ -1,0 +1,27 @@
+﻿@model List<WebApplication1.Models.TacGium>
+<h2>Tác giả</h2>
+
+<p><a asp-action="Create">Thêm tác giả</a></p>
+
+<table border="1" cellpadding="6">
+    <tr>
+        <th>ID</th>
+        <th>Tên tác giả</th>
+        <th></th>
+    </tr>
+
+    @foreach (var x in Model)
+    {
+        <tr>
+            <td>@x.TacGiaId</td>
+            <td>@x.TenTacGia</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@x.TacGiaId">Sửa</a>
+                <form asp-action="Delete" method="post" style="display:inline">
+                    <input type="hidden" name="id" value="@x.TacGiaId" />
+                    <button type="submit">Xoá</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>

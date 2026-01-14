@@ -1,0 +1,13 @@
+﻿@model WebApplication1.Models.TacGium
+<h2>Sửa tác giả</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="TacGiaId" />
+
+    <div>
+        <label>Tên tác giả</label>
+        <input asp-for="TenTacGia" />
+    </div>
+
+    <button type="submit">Lưu</button>
+</form>

@@ -1,0 +1,22 @@
+﻿@model List<WebApplication1.Models.TheLoai>
+
+<h2>Thể loại</h2>
+<p><a asp-action="Create">Thêm</a></p>
+
+<table border="1" cellpadding="6">
+    <tr><th>ID</th><th>Tên</th><th></th></tr>
+    @foreach (var x in Model)
+    {
+        <tr>
+            <td>@x.TheLoaiId</td>
+            <td>@x.TenTheLoai</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@x.TheLoaiId">Sửa</a>
+                <form asp-action="Delete" method="post" style="display:inline">
+                    <input type="hidden" name="id" value="@x.TheLoaiId" />
+                    <button type="submit">Xoá</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>

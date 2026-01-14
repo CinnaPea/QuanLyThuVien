@@ -1,0 +1,14 @@
+﻿@model WebApplication1.Models.TheLoai
+<h2>Sửa thể loại</h2>
+<form method="post">
+    <input type="hidden" asp-for="TheLoaiId" />
+    <div>
+        <label>Tên thể loại</label>
+        <input asp-for="TenTheLoai" />
+    </div>
+    <div>
+        <label>Mô tả</label>
+        <input asp-for="MoTa" />
+    </div>
+    <button type="submit">Lưu</button>
+</form>

@@ -1,0 +1,24 @@
+﻿@model WebApplication1.Models.PhieuMuon
+@{
+    var ct = ViewBag.CT as List<WebApplication1.Models.CtPhieuMuon> ?? new();
+}
+<h2>Lập phiếu trả cho phiếu mượn #@Model.PhieuMuonId</h2>
+
+<p>Độc giả: @Model.DocGia?.HoTen</p>
+<p>Hạn trả: @Model.HanTra</p>
+
+<table border="1" cellpadding="6">
+    <tr><th>Mã sách</th><th>Đầu sách</th></tr>
+    @foreach (var x in ct)
+    {
+        <tr>
+            <td>@x.SachId</td>
+            <td>@x.Sach?.DauSach?.TieuDe</td>
+        </tr>
+    }
+</table>
+
+<form method="post" asp-action="ReturnAll">
+    <input type="hidden" name="phieuMuonId" value="@Model.PhieuMuonId" />
+    <button type="submit">Xác nhận trả tất cả</button>
+</form>

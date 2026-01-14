@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 using WebApplication1.Services.Implementations;
 using WebApplication1.Services.Interfaces;
@@ -17,22 +17,42 @@ namespace WebApplication1
 
             builder.Services.AddControllersWithViews();
 
-            var app = builder.Build();
+builder.Services.AddDbContext<QuanLyThuVienContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+// Debug chuỗi kết nối thật sự
+var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine(">>> DefaultConnection = " + (cs ?? "NULL"));
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+builder.Services.AddSession(o =>
+{
+    o.IdleTimeout = TimeSpan.FromMinutes(60);
+    o.Cookie.HttpOnly = true;
+    o.Cookie.IsEssential = true;
+});
 
-            app.UseRouting();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(o =>
+    {
+        o.LoginPath = "/Account/Login";
+        o.AccessDeniedPath = "/Account/AccessDenied";
+    });
 
-            app.UseAuthorization();
+builder.Services.AddAuthorization(o =>
+{
+    o.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
+});
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseSession();
+app.UseAuthentication();
+app.UseAuthorization();
 
             //app.MapAreaControllerRoute(
             //    name: "Admin",
@@ -43,8 +63,4 @@ namespace WebApplication1
                 name: "default",
                 pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
-            app.Run();
-            
-        }
-    }
-}
+app.Run();

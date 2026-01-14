@@ -1,0 +1,43 @@
+﻿@model WebApplication1.Models.Sach
+<h2>Sửa sách bản sao</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="SachId" />
+
+    <div>
+        <label>Đầu sách</label>
+        <select asp-for="DauSachId" asp-items="ViewBag.DauSachId"></select>
+    </div>
+
+    <div>
+        <label>Mã vạch</label>
+        <input asp-for="MaVach" />
+    </div>
+
+    <div>
+        <label>Vị trí kệ</label>
+        <input asp-for="ViTriKe" />
+    </div>
+
+    <div>
+        <label>Ngày nhập</label>
+        <input asp-for="NgayNhap" type="date" />
+    </div>
+
+    <div>
+        <label>Tình trạng</label>
+        <select asp-for="TinhTrang">
+            <option value="Con">Còn</option>
+            <option value="DangMuon">Đang mượn</option>
+            <option value="Hong">Hỏng</option>
+            <option value="Mat">Mất</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Ghi chú</label>
+        <input asp-for="GhiChu" />
+    </div>
+
+    <button type="submit">Lưu</button>
+</form>

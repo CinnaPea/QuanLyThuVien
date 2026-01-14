@@ -1,0 +1,22 @@
+﻿
+@model List<WebApplication1.Models.PhieuMuon>
+<h2>Trả sách (phiếu đang mượn)</h2>
+
+@if (TempData["ok"] != null)
+{
+     <div style="color:green">@TempData["ok"]</div>
+}
+
+<table border="1" cellpadding="6">
+    <tr><th>Mã</th><th>Độc giả</th><th>Ngày mượn</th><th>Hạn trả</th><th></th></tr>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.PhieuMuonId</td>
+            <td>@p.DocGia?.HoTen</td>
+            <td>@p.NgayMuon</td>
+            <td>@p.HanTra</td>
+            <td><a asp-action="ReturnForm" asp-route-id="@p.PhieuMuonId">Lập phiếu trả</a></td>
+        </tr>
+    }
+</table>
