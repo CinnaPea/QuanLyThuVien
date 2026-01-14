@@ -155,3 +155,30 @@
     padding-right: 22px;
   }
 }
+/* Uniform action buttons in tables */
+.admin-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px; /* consistent height */
+    min-width: 92px; /* consistent width */
+    padding: 0 12px; /* consistent padding */
+    border-radius: 10px;
+    font-weight: 800;
+    letter-spacing: .2px;
+    line-height: 1;
+}
+
+/* keep spacing between buttons (anchor + form) */
+.admin-inline-form {
+    display: inline-block;
+    margin: 0 0 0 8px;
+}
+
+td.text-right .admin-action-btn {
+    margin-left: 8px;
+}
+
+    td.text-right .admin-action-btn:first-child {
+        margin-left: 0;
+    }

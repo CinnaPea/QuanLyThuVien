@@ -243,6 +243,14 @@
                                     </td>
 
                                     <td class="text-right">
+                                        <a asp-area="Admin"
+                                           asp-controller="Sach"
+                                           asp-action="CreateBatch"
+                                           asp-route-dauSachId="@x.DauSachId"
+                                           class="btn btn-sm btn-success admin-action-btn">
+                                            + Bản sao
+                                        </a>
+
                                         <a asp-action="Edit" asp-route-id="@x.DauSachId"
                                            class="btn btn-sm btn-info admin-action-btn">
                                             Sửa
@@ -250,12 +258,14 @@
 
                                         <form asp-action="Delete" method="post" class="admin-inline-form"
                                               onsubmit="return confirm('Xoá đầu sách này?');">
+                                            @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@x.DauSachId" />
                                             <button type="submit" class="btn btn-sm btn-danger admin-action-btn">
                                                 Xoá
                                             </button>
                                         </form>
                                     </td>
+
                                 </tr>
                             }
                         }

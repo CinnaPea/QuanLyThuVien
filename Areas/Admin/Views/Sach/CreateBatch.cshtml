@@ -1,0 +1,81 @@
+﻿@model WebApplication1.VMs.SachBatchVM
+@{
+    ViewData["Title"] = "Thêm sách bản sao (hàng loạt)";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <link rel="stylesheet" href="~/css/CRUD.css" />
+</head>
+
+<div class="admin-page">
+    <div class="admin-toolbar">
+        <div>
+            <h2 class="admin-title">📦 Thêm sách bản sao</h2>
+            <div class="admin-subtitle">
+                Đầu sách: <b>@Model.DauSachTieuDe</b> (#@Model.DauSachId)
+            </div>
+        </div>
+
+        <div class="admin-actions">
+            <a asp-area="Admin" asp-controller="DauSach" asp-action="Index" class="btn btn-default admin-btn">
+                ← Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-card admin-form-card">
+        <div class="admin-card__body" style="padding:18px;">
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="DauSachId" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Số lượng</label>
+                            <input asp-for="SoLuong" class="form-control" type="number" min="1" max="500" />
+                            <span asp-validation-for="SoLuong" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Vị trí kệ</label>
+                            <input asp-for="ViTriKe" class="form-control" placeholder="VD: Kệ A2 - Tầng 1" />
+                            <span asp-validation-for="ViTriKe" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Ngày nhập</label>
+                            <input asp-for="NgayNhap" class="form-control" type="date" />
+                            <span asp-validation-for="NgayNhap" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Tình trạng</label>
+                            <select asp-for="TinhTrang" class="form-control">
+                                <option value="Con">Còn</option>
+                                <option value="DangMuon">Đang mượn</option>
+                                <option value="Hong">Hỏng</option>
+                                <option value="Mat">Mất</option>
+                            </select>
+                            <span asp-validation-for="TinhTrang" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Ghi chú</label>
+                            <textarea asp-for="GhiChu" class="form-control" rows="6"
+                                      placeholder="Tuỳ chọn: ghi chú lô nhập..."></textarea>
+                            <span asp-validation-for="GhiChu" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-form-actions">
+                    <button type="submit" class="btn btn-primary">Tạo bản sao</button>
+                    <a asp-area="Admin" asp-controller="DauSach" asp-action="Index" class="btn btn-default">Huỷ</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
