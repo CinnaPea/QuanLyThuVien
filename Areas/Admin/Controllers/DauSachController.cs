@@ -18,21 +18,43 @@ namespace WebApplication1.Areas.Admin.Controllers
             var list = await _db.DauSaches
                 .Include(x => x.TheLoai)
                 .Include(x => x.NhaXuatBan)
-                .OrderByDescending(x => x.DauSachId)
+                .OrderBy(x => x.DauSachId)
                 .ToListAsync();
             return View(list);
+        }
+        private void LoadDropDowns(DauSach? item = null)
+        {
+            ViewBag.TheLoaiId = new SelectList(
+                _db.TheLoais.ToList(),
+                "TheLoaiId",
+                "TenTheLoai",
+                item?.TheLoaiId
+            );
+
+            ViewBag.NhaXuatBanId = new SelectList(
+                _db.NhaXuatBans.ToList(),
+                "NhaXuatBanId",
+                "TenNxb",          // ✅ FIX THIS (match your model property exactly)
+                item?.NhaXuatBanId
+            );
         }
 
         public IActionResult Create()
         {
-            ViewBag.TheLoaiId = new SelectList(_db.TheLoais, "TheLoaiId", "TenTheLoai");
-            ViewBag.NhaXuatBanId = new SelectList(_db.NhaXuatBans, "NhaXuatBanId", "TenNXB");
+            LoadDropDowns();
             return View(new DauSach());
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DauSach model)
         {
+            if (!ModelState.IsValid)
+            {
+                LoadDropDowns(model);
+                return View(model);
+            }
+
             _db.DauSaches.Add(model);
             await _db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -42,18 +64,28 @@ namespace WebApplication1.Areas.Admin.Controllers
         {
             var item = await _db.DauSaches.FindAsync(id);
             if (item == null) return NotFound();
-            ViewBag.TheLoaiId = new SelectList(_db.TheLoais, "TheLoaiId", "TenTheLoai", item.TheLoaiId);
-            ViewBag.NhaXuatBanId = new SelectList(_db.NhaXuatBans, "NhaXuatBanId", "TenNXB", item.NhaXuatBanId);
+
+            LoadDropDowns(item);
             return View(item);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(DauSach model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, DauSach model)
         {
+            if (id != model.DauSachId) return BadRequest();
+
+            if (!ModelState.IsValid)
+            {
+                LoadDropDowns(model);
+                return View(model);
+            }
+
             _db.DauSaches.Update(model);
             await _db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Delete(int id)

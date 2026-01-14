@@ -17,22 +17,43 @@ namespace WebApplication1.Areas.Admin.Controllers
         {
             var list = await _db.Saches
                 .Include(x => x.DauSach)
-                .OrderByDescending(x => x.SachId)
+                .OrderBy(x => x.SachId)
                 .ToListAsync();
             return View(list);
+        }
+        private void LoadDauSachDropdown(int? selectedId = null)
+        {
+            ViewBag.DauSachId = new SelectList(
+                _db.DauSaches.ToList(),
+                "DauSachId",
+                "TieuDe",
+                selectedId
+            );
         }
 
         public IActionResult Create()
         {
-            ViewBag.DauSachId = new SelectList(_db.DauSaches, "DauSachId", "TieuDe");
-            return View(new Sach { TinhTrang = "Con" });
+            LoadDauSachDropdown();
+            return View(new Sach
+            {
+                TinhTrang = "Con",
+                NgayNhap = DateOnly.FromDateTime(DateTime.Today)
+            });
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Sach model)
         {
+            if (!ModelState.IsValid)
+            {
+                LoadDauSachDropdown(model.DauSachId);
+                return View(model);
+            }
+
             _db.Saches.Add(model);
             await _db.SaveChangesAsync();
+            TempData["ok"] = "Đã thêm sách bản sao.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -40,17 +61,32 @@ namespace WebApplication1.Areas.Admin.Controllers
         {
             var item = await _db.Saches.FindAsync(id);
             if (item == null) return NotFound();
-            ViewBag.DauSachId = new SelectList(_db.DauSaches, "DauSachId", "TieuDe", item.DauSachId);
+
+            LoadDauSachDropdown(item.DauSachId);
             return View(item);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Sach model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Sach model)
         {
+            if (id != model.SachId) return BadRequest();
+
+            if (!ModelState.IsValid)
+            {
+                LoadDauSachDropdown(model.DauSachId);
+                return View(model);
+            }
+
+            var exists = await _db.Saches.AnyAsync(x => x.SachId == id);
+            if (!exists) return NotFound();
+
             _db.Saches.Update(model);
             await _db.SaveChangesAsync();
+            TempData["ok"] = "Đã cập nhật sách bản sao.";
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Delete(int id)

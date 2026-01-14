@@ -5,8 +5,62 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<div class="admin-page">
+<style>
+    .admin-page {
+        margin-top: 10px;
+    }
 
+    .admin-page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+
+    .admin-title {
+        margin: 0 0 6px 0;
+        font-weight: 800;
+        letter-spacing: .2px;
+    }
+
+    .admin-sub {
+        margin: 0;
+        color: rgba(0,0,0,.55);
+    }
+
+    .admin-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,.06);
+        border-radius: 16px;
+        box-shadow: 0 16px 40px rgba(0,0,0,.08);
+        padding: 10px 12px;
+    }
+
+    .admin-table thead th {
+        vertical-align: middle;
+        font-weight: 800;
+    }
+
+    .admin-table td {
+        vertical-align: middle;
+    }
+
+    .admin-btn {
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 600;
+    }
+
+    .admin-btn__icon {
+        display: inline-block;
+        margin-right: 6px;
+        font-weight: 900;
+        transform: translateY(-1px);
+    }
+</style>
+<div class="admin-page">
     <div class="admin-page-head">
         <div>
             <h2 class="admin-title">🏢 Nhà xuất bản</h2>

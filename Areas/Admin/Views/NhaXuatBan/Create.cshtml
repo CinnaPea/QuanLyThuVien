@@ -1,21 +1,65 @@
 ﻿@model WebApplication1.Models.NhaXuatBan
-<h2>Thêm nhà xuất bản</h2>
 
-<form method="post">
-    <div>
-        <label>Tên NXB</label>
-        <input asp-for="TenNxb" />
+@{
+    ViewData["Title"] = "Thêm nhà xuất bản";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <link rel="stylesheet" href="~/css/CRUD.css" />
+</head>
+<body>
+    <div class="admin-page">
+        <div class="admin-page-head">
+            <div>
+                <h2 class="admin-title">🏢 Thêm nhà xuất bản</h2>
+                <p class="admin-sub">Tạo mới thông tin NXB để dùng cho đầu sách.</p>
+            </div>
+
+            <div class="admin-actions">
+                <a asp-action="Index" class="btn btn-default">← Quay lại</a>
+            </div>
+        </div>
+
+        <div class="admin-card admin-form-card">
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger admin-valsum"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Tên NXB</label>
+                            <input asp-for="TenNxb" class="form-control" placeholder="VD: NXB Trẻ" />
+                            <span asp-validation-for="TenNxb" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Điện thoại</label>
+                            <input asp-for="DienThoai" class="form-control" placeholder="VD: 028xxxxxxx" />
+                            <span asp-validation-for="DienThoai" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Địa chỉ</label>
+                            <input asp-for="DiaChi" class="form-control" placeholder="VD: Quận 1, TP.HCM" />
+                            <span asp-validation-for="DiaChi" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        💾 Lưu
+                    </button>
+                    <a asp-action="Index" class="btn btn-default">
+                        Huỷ
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
+</body>
 
-    <div>
-        <label>Địa chỉ</label>
-        <input asp-for="DiaChi" />
-    </div>
-
-    <div>
-        <label>Điện thoại</label>
-        <input asp-for="DienThoai" />
-    </div>
-
-    <button type="submit">Lưu</button>
-</form>

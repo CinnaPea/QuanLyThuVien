@@ -1,43 +1,95 @@
 ﻿@model WebApplication1.Models.DauSach
-<h2>Sửa đầu sách</h2>
 
-<form method="post">
-    <input type="hidden" asp-for="DauSachId" />
+@{
+    ViewData["Title"] = "Sửa đầu sách";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
 
-    <div>
-        <label>Tiêu đề</label>
-        <input asp-for="TieuDe" />
+<head>
+    <link rel="stylesheet" href="~/css/CRUD.css" />
+</head>
+<body>
+    <div class="admin-page">
+        <div class="admin-page-head">
+            <div>
+                <h2 class="admin-title">✏️ Sửa đầu sách</h2>
+                <p class="admin-sub">Cập nhật thông tin cho đầu sách #@Model?.DauSachId</p>
+            </div>
+            <div class="admin-actions">
+                <a asp-action="Index" class="btn btn-default">← Quay lại</a>
+            </div>
+        </div>
+
+        <div class="admin-card admin-form-card">
+            <form method="post" class="form-horizontal">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="DauSachId" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger admin-valsum"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Tiêu đề</label>
+                            <input asp-for="TieuDe" class="form-control" />
+                            <span asp-validation-for="TieuDe" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group admin-fg">
+                            <label class="control-label">ISBN</label>
+                            <input asp-for="Isbn" class="form-control" />
+                            <span asp-validation-for="Isbn" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Năm xuất bản</label>
+                            <input asp-for="NamXuatBan" class="form-control" />
+                            <span asp-validation-for="NamXuatBan" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Ngôn ngữ</label>
+                            <input asp-for="NgonNgu" class="form-control" />
+                            <span asp-validation-for="NgonNgu" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Thể loại</label>
+                            <select asp-for="TheLoaiId" asp-items="ViewBag.TheLoaiId" class="form-control">
+                                <option value="">— Chọn thể loại —</option>
+                            </select>
+                            <span asp-validation-for="TheLoaiId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Nhà xuất bản</label>
+                            <select asp-for="NhaXuatBanId" asp-items="ViewBag.NhaXuatBanId" class="form-control">
+                                <option value="">— Chọn NXB —</option>
+                            </select>
+                            <span asp-validation-for="NhaXuatBanId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Mô tả</label>
+                            <textarea asp-for="MoTa" rows="6" class="form-control"></textarea>
+                            <span asp-validation-for="MoTa" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-form-actions">
+                    <button type="submit" class="btn btn-primary admin-btn">
+                        ✅ Cập nhật
+                    </button>
+                    <a asp-action="Index" class="btn btn-default">
+                        Huỷ
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
+</body>
 
-    <div>
-        <label>ISBN</label>
-        <input asp-for="Isbn" />
-    </div>
 
-    <div>
-        <label>Năm xuất bản</label>
-        <input asp-for="NamXuatBan" />
-    </div>
-
-    <div>
-        <label>Ngôn ngữ</label>
-        <input asp-for="NgonNgu" />
-    </div>
-
-    <div>
-        <label>Thể loại</label>
-        <select asp-for="TheLoaiId" asp-items="ViewBag.TheLoaiId"></select>
-    </div>
-
-    <div>
-        <label>Nhà xuất bản</label>
-        <select asp-for="NhaXuatBanId" asp-items="ViewBag.NhaXuatBanId"></select>
-    </div>
-
-    <div>
-        <label>Mô tả</label>
-        <textarea asp-for="MoTa" rows="4"></textarea>
-    </div>
-
-    <button type="submit">Lưu</button>
-</form>

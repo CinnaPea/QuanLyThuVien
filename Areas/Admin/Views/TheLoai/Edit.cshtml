@@ -1,14 +1,55 @@
 ﻿@model WebApplication1.Models.TheLoai
-<h2>Sửa thể loại</h2>
-<form method="post">
-    <input type="hidden" asp-for="TheLoaiId" />
-    <div>
-        <label>Tên thể loại</label>
-        <input asp-for="TenTheLoai" />
+
+@{
+    ViewData["Title"] = "Sửa thể loại";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <link rel="stylesheet" href="~/css/CRUD.css" />
+</head>
+<body>
+    <div class="admin-page">
+        <div class="admin-page-head">
+            <div>
+                <h2 class="admin-title">✏️ Sửa thể loại</h2>
+                <p class="admin-sub">Cập nhật thông tin thể loại #@Model?.TheLoaiId</p>
+            </div>
+
+            <div class="admin-actions">
+                <a asp-action="Index" class="btn btn-default">← Quay lại</a>
+            </div>
+        </div>
+
+        <div class="admin-card admin-form-card">
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="TheLoaiId" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger admin-valsum"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Tên thể loại</label>
+                            <input asp-for="TenTheLoai" class="form-control" />
+                            <span asp-validation-for="TenTheLoai" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Mô tả</label>
+                            <textarea asp-for="MoTa" rows="4" class="form-control"></textarea>
+                            <span asp-validation-for="MoTa" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-form-actions">
+                    <button type="submit" class="btn btn-primary">✅ Cập nhật</button>
+                    <a asp-action="Index" class="btn btn-default">Huỷ</a>
+                </div>
+            </form>
+        </div>
     </div>
-    <div>
-        <label>Mô tả</label>
-        <input asp-for="MoTa" />
-    </div>
-    <button type="submit">Lưu</button>
-</form>
+</body>

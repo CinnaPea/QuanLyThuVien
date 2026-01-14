@@ -18,7 +18,7 @@ namespace WebApplication1.Areas.Admin.Controllers
             var list = await _db.PhieuMuons
                 .Include(x => x.DocGia)
                 .Where(x => x.TrangThai == "DangMuon")
-                .OrderByDescending(x => x.PhieuMuonId)
+                .OrderBy(x => x.PhieuMuonId)
                 .ToListAsync();
             return View(list);
         }

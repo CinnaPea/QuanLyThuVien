@@ -15,7 +15,7 @@ namespace WebApplication1.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
         {
             var list = await _db.Phats
-                .OrderByDescending(x => x.PhatId)
+                .OrderBy(x => x.PhatId)
                 .ToListAsync();
             return View(list);
         }
