@@ -1,5 +1,8 @@
-﻿
-@model List<WebApplication1.Models.PhieuMuon>
+﻿@model List<WebApplication1.Models.PhieuMuon>
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
 <h2>Trả sách (phiếu đang mượn)</h2>
 
 @if (TempData["ok"] != null)

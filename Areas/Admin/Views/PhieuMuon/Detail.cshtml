@@ -1,7 +1,11 @@
-﻿@model WebApplication1.Models.PhieuMuon 
+﻿@model WebApplication1.Models.PhieuMuon
+
 @{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var ct = ViewBag.CT as List<WebApplication1.Models.CtPhieuMuon> ?? new();
 }
+
 <h2>Chi tiết phiếu mượn #@Model.PhieuMuonId</h2>
 
 @if (TempData["err"] != null)

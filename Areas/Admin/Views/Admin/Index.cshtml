@@ -1,11 +1,95 @@
-﻿<h2>Trang quản trị</h2>
-<ul>
-    <li><a asp-area="Admin" asp-controller="TheLoai" asp-action="Index">Thể loại</a></li>
-    <li><a asp-area="Admin" asp-controller="NhaXuatBan" asp-action="Index">Nhà xuất bản</a></li>
-    <li><a asp-area="Admin" asp-controller="TacGia" asp-action="Index">Tác giả</a></li>
-    <li><a asp-area="Admin" asp-controller="DauSach" asp-action="Index">Đầu sách</a></li>
-    <li><a asp-area="Admin" asp-controller="Sach" asp-action="Index">Sách (bản sao)</a></li>
-    <li><a asp-area="Admin" asp-controller="PhieuMuon" asp-action="ChoDuyet">Phiếu mượn chờ duyệt</a></li>
-    <li><a asp-area="Admin" asp-controller="PhieuTra" asp-action="Index">Trả sách</a></li>
-    <li><a asp-area="Admin" asp-controller="Phat" asp-action="Index">Phạt</a></li>
-</ul>
+﻿@model WebApplication1.VMs.DashboardVM
+
+@{
+    ViewData["Title"] = "Trang quản trị";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+</head>
+<body>
+    <div class="container-fluid">
+        <h1 class="dashboard-title mb-4">📊 Admin Dashboard</h1>
+
+        <!-- ADMIN NAV -->
+        <h4 class="mb-3">⚙️ Quản lý hệ thống</h4>
+
+        <ul class="admin-links">
+            <li><a asp-area="Admin" asp-controller="TheLoai" asp-action="Index">📚 Thể loại</a></li>
+            <li><a asp-area="Admin" asp-controller="NhaXuatBan" asp-action="Index">🏢 Nhà xuất bản</a></li>
+            <li><a asp-area="Admin" asp-controller="TacGia" asp-action="Index">✍️ Tác giả</a></li>
+            <li><a asp-area="Admin" asp-controller="DauSach" asp-action="Index">📖 Đầu sách</a></li>
+            <li><a asp-area="Admin" asp-controller="Sach" asp-action="Index">📦 Sách (bản sao)</a></li>
+            <li><a asp-area="Admin" asp-controller="PhieuMuon" asp-action="ChoDuyet">🕒 Phiếu mượn chờ duyệt</a></li>
+            <li><a asp-area="Admin" asp-controller="PhieuTra" asp-action="Index">↩️ Trả sách</a></li>
+            <li><a asp-area="Admin" asp-controller="Phat" asp-action="Index">💰 Phạt</a></li>
+        </ul>
+
+        <!-- STAT CARDS -->
+        <div class="row g-4">
+            <div class="col-xl-3 col-md-6 px-2">
+                <div class="stat-card bg-gradient-primary p-4">
+                    <div class="stat-card-content">
+                        <div class="stat-label">TỔNG SỐ SÁCH</div>
+                        <div class="stat-value">@Model.TongSach</div>
+                    </div>
+                    <div class="stat-icon">📚</div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 px-2">
+                <div class="stat-card bg-gradient-info p-4">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Sách đang mượn</div>
+                        <div class="stat-value">@Model.SachDangMuon</div>
+                    </div>
+                    <div class="stat-icon">📖</div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 px-2">
+                <div class="stat-card bg-gradient-warning p-4">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Phiếu mượn quá hạn</div>
+                        <div class="stat-value">@Model.PhieuMuonQuaHan</div>
+                    </div>
+                    <div class="stat-icon">⏰</div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 px-2">
+                <div class="stat-card bg-gradient-success p-4">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Độc giả hoạt động</div>
+                        <div class="stat-value">@Model.DocGiaDangHoatDong</div>
+                    </div>
+                    <div class="stat-icon">👤</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MONEY / FINE SUMMARY -->
+        <div class="row mt-5">
+            <div class="col-lg-6 col-md-8">
+                <div class="money-card shadow-sm">
+                    <div class="money-content">
+                        <div class="money-title">TIỀN PHẠT CHƯA THANH TOÁN</div>
+
+                        <div class="money-value">
+                            @Model.TongTienPhatChuaThanhToan.ToString("N0") ₫
+                        </div>
+
+                        <div class="money-sub">
+                            Tổng số tiền phạt hiện tại chưa được thanh toán trong hệ thống
+                        </div>
+                    </div>
+
+                    <div class="money-icon">💰</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
