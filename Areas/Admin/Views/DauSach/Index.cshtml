@@ -1,44 +1,267 @@
 ﻿@model List<WebApplication1.Models.DauSach>
 
-
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Đầu sách";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Đầu sách</h2>
-
-<p><a asp-action="Create">Thêm đầu sách</a></p>
-
-<table border="1" cellpadding="6">
-    <tr>
-        <th>ID</th>
-        <th>Tiêu đề</th>
-        <th>ISBN</th>
-        <th>Năm XB</th>
-        <th>Ngôn ngữ</th>
-        <th>Thể loại</th>
-        <th>NXB</th>
-        <th></th>
-    </tr>
-
-    @foreach (var x in Model)
-    {
-        <tr>
-            <td>@x.DauSachId</td>
-            <td>@x.TieuDe</td>
-            <td>@x.Isbn</td>
-            <td>@x.NamXuatBan</td>
-            <td>@x.NgonNgu</td>
-            <td>@x.TheLoai?.TenTheLoai</td>
-            <td>@x.NhaXuatBan?.TenNxb</td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@x.DauSachId">Sửa</a>
-                <form asp-action="Delete" method="post" style="display:inline">
-                    <input type="hidden" name="id" value="@x.DauSachId" />
-                    <button type="submit">Xoá</button>
-                </form>
-            </td>
-        </tr>
+<style>
+    /* =========================
+       Admin CRUD Page (DauSach)
+       ========================= */
+    .admin-page {
+        padding: 10px 0 30px;
     }
-</table>
+
+    .admin-toolbar {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 8px 0 14px;
+        flex-wrap: wrap;
+    }
+
+    .admin-title {
+        margin: 0;
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: .2px;
+    }
+
+    .admin-subtitle {
+        margin-top: 6px;
+        color: rgba(0,0,0,.55);
+        font-size: 13px;
+    }
+
+    .admin-btn {
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 600;
+    }
+
+    .admin-btn__icon {
+        display: inline-block;
+        margin-right: 6px;
+        font-weight: 900;
+        transform: translateY(-1px);
+    }
+
+    .admin-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,.08);
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.06);
+        overflow: hidden;
+    }
+
+    .admin-card__body {
+        padding: 0;
+    }
+
+    .admin-table {
+        margin: 0;
+    }
+
+        .admin-table thead th {
+            background: rgba(0,0,0,.03);
+            border-bottom: 1px solid rgba(0,0,0,.08) !important;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            padding: 14px 12px !important;
+            white-space: nowrap;
+        }
+
+        .admin-table tbody td {
+            padding: 14px 12px !important;
+            vertical-align: middle !important;
+        }
+
+    .admin-title-cell__name {
+        font-weight: 700;
+        line-height: 1.25;
+    }
+
+    .admin-mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 12.5px;
+    }
+
+    .admin-muted {
+        color: rgba(0,0,0,.45);
+    }
+
+    .admin-pill {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(0,0,0,.06);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .admin-pill--soft {
+        background: rgba(255,195,0,.18); /* “corporate gold” */
+    }
+
+    .admin-pill--isbn {
+        background: rgba(0,0,0,.08);
+    }
+
+    .admin-action-btn {
+        border-radius: 10px;
+        padding: 7px 10px;
+        font-weight: 700;
+    }
+
+    .admin-inline-form {
+        display: inline-block;
+        margin: 0 0 0 6px;
+    }
+
+    .admin-empty {
+        text-align: center;
+        padding: 28px 12px !important;
+        color: rgba(0,0,0,.55);
+        background: #fff;
+    }
+
+</style>
+
+<div class="admin-page">
+    <!-- Toolbar -->
+    <div class="admin-toolbar">
+        <div class="admin-toolbar__left">
+            <h2 class="admin-title">📖 Đầu sách</h2>
+            <div class="admin-subtitle">Quản lý tiêu đề, ISBN, năm xuất bản, ngôn ngữ, thể loại, NXB</div>
+        </div>
+
+        <div class="admin-toolbar__right">
+            <a asp-action="Create" class="btn btn-primary admin-btn">
+                <span class="admin-btn__icon">＋</span> Thêm đầu sách
+            </a>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="admin-card">
+        <div class="admin-card__body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;">ID</th>
+                            <th>Tiêu đề</th>
+                            <th style="width: 160px;">ISBN</th>
+                            <th style="width: 110px;">Năm XB</th>
+                            <th style="width: 130px;">Ngôn ngữ</th>
+                            <th style="width: 160px;">Thể loại</th>
+                            <th style="width: 180px;">NXB</th>
+                            <th style="width: 170px;" class="text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="admin-empty">
+                                    Chưa có dữ liệu đầu sách. Bấm <b>“Thêm đầu sách”</b> để bắt đầu.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var x in Model)
+                            {
+                                <tr>
+                                    <td class="admin-mono">@x.DauSachId</td>
+
+                                    <td>
+                                        <div class="admin-title-cell">
+                                            <div class="admin-title-cell__name">@x.TieuDe</div>
+                                        </div>
+                                    </td>
+
+                                    <td class="admin-mono">
+                                        @if (!string.IsNullOrWhiteSpace(x.Isbn))
+                                        {
+                                            <span class="admin-pill admin-pill--isbn">@x.Isbn</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (x.NamXuatBan != null)
+                                        {
+                                            <span class="admin-pill">@x.NamXuatBan</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(x.NgonNgu))
+                                        {
+                                            <span class="admin-pill">@x.NgonNgu</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (x.TheLoai != null)
+                                        {
+                                            <span class="admin-pill admin-pill--soft">@x.TheLoai.TenTheLoai</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-muted">Chưa gán</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (x.NhaXuatBan != null)
+                                        {
+                                            <span class="admin-pill admin-pill--soft">@x.NhaXuatBan.TenNxb</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-muted">Chưa gán</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-right">
+                                        <a asp-action="Edit" asp-route-id="@x.DauSachId"
+                                           class="btn btn-sm btn-info admin-action-btn">
+                                            Sửa
+                                        </a>
+
+                                        <form asp-action="Delete" method="post" class="admin-inline-form"
+                                              onsubmit="return confirm('Xoá đầu sách này?');">
+                                            <input type="hidden" name="id" value="@x.DauSachId" />
+                                            <button type="submit" class="btn btn-sm btn-danger admin-action-btn">
+                                                Xoá
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

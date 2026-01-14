@@ -36,11 +36,11 @@
 
         <nav id="colorlib-main-menu" role="navigation">
             <ul>
-                <li class="active"><a asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                <li class="active"><a asp-area="Admin" asp-controller="Admin" asp-action="Index">Dashboard</a></li>
                 <li><a asp-area="Admin" asp-controller="DauSach" asp-action="Index">Đầu sách</a></li>
                 <li><a asp-area="Admin" asp-controller="Sach" asp-action="Index">Sách</a></li>
                 <li><a asp-area="Admin" asp-controller="TacGia" asp-action="Index">Tác giả</a></li>
-                <li><a asp-area="Admin" asp-controller="PhieuMuon" asp-action="Index">Phiếu mượn</a></li>
+                <li><a asp-area="Admin" asp-controller="PhieuMuon" asp-action="ChoDuyet">Phiếu mượn</a></li>
                 <li><a asp-area="Admin" asp-controller="PhieuTra" asp-action="Index">Phiếu trả</a></li>
                 <li><a asp-area="Admin" asp-controller="Phat" asp-action="Index">Tiền phạt</a></li>
             </ul>

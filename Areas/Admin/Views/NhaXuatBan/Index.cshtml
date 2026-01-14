@@ -1,37 +1,81 @@
 ﻿@model List<WebApplication1.Models.NhaXuatBan>
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Nhà xuất bản";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Nhà xuất bản</h2>
+<div class="admin-page">
 
-<p><a asp-action="Create">Thêm NXB</a></p>
+    <div class="admin-page-head">
+        <div>
+            <h2 class="admin-title">🏢 Nhà xuất bản</h2>
+            <p class="admin-sub">Quản trị danh mục NXB trong hệ thống.</p>
+        </div>
 
-<table border="1" cellpadding="6">
-    <tr>
-        <th>ID</th>
-        <th>Tên NXB</th>
-        <th>Địa chỉ</th>
-        <th>Điện thoại</th>
-        <th></th>
-    </tr>
+        <div class="admin-actions">
+            <a asp-action="Create" class="btn btn-primary">
+                + Thêm NXB
+            </a>
+        </div>
+    </div>
 
-    @foreach (var x in Model)
+    @if (Model == null || !Model.Any())
     {
-        <tr>
-            <td>@x.NhaXuatBanId</td>
-            <td>@x.TenNxb</td>
-            <td>@x.DiaChi</td>
-            <td>@x.DienThoai</td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@x.NhaXuatBanId">Sửa</a>
-                <form asp-action="Delete" method="post" style="display:inline">
-                    <input type="hidden" name="id" value="@x.NhaXuatBanId" />
-                    <button type="submit">Xoá</button>
-                </form>
-            </td>
-        </tr>
+        <div class="alert alert-info" style="border-radius:12px;">
+            Chưa có nhà xuất bản nào. Bấm <b>Thêm NXB</b> để khởi tạo dữ liệu.
+        </div>
     }
-</table>
+    else
+    {
+        <div class="admin-card">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:90px;">ID</th>
+                            <th>Tên NXB</th>
+                            <th>Địa chỉ</th>
+                            <th style="width:160px;">Điện thoại</th>
+                            <th style="width:180px;">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var x in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="label label-default">#@x.NhaXuatBanId</span>
+                                </td>
+                                <td>
+                                    <strong>@x.TenNxb</strong>
+                                </td>
+                                <td>@x.DiaChi</td>
+                                <td>@x.DienThoai</td>
+                                <td>
+                                    <div class="btn-group" role="group" aria-label="Actions">
+                                        <a asp-action="Edit" asp-route-id="@x.NhaXuatBanId"
+                                           class="btn btn-info btn-sm">
+                                            Sửa
+                                        </a>
+
+                                        <form asp-action="Delete" asp-route-id="@x.NhaXuatBanId"
+                                              method="post" style="display:inline"
+                                              onsubmit="return confirm('Xoá NXB này? Hành động không thể hoàn tác.');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                Xoá
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+</div>

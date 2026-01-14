@@ -1,9 +1,13 @@
 ﻿@model WebApplication1.VMs.DashboardVM
 
 @{
-    ViewData["Title"] = "Trang quản trị";
+    ViewData["Title"] = "Admin Dashboard";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var area = ViewContext.RouteData.Values["area"]?.ToString();
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string c) => (area == "Admin" && controller == c) ? "is-active" : "";
 }
+
 
 <head>
     <link rel="stylesheet" href="~/css/dashboard.css" />
@@ -12,20 +16,58 @@
     <div class="container-fluid">
         <h1 class="dashboard-title mb-4">📊 Admin Dashboard</h1>
 
-        <!-- ADMIN NAV -->
-        <h4 class="mb-3">⚙️ Quản lý hệ thống</h4>
+        <!-- ADMIN NAV (Dropdown) -->
+        <div class="admin-dd">
+            <div class="dropdown">
+                <button class="btn admin-dd-btn dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    ⚙️ Quản lý hệ thống
+                </button>
 
-        <ul class="admin-links">
-            <li><a asp-area="Admin" asp-controller="TheLoai" asp-action="Index">📚 Thể loại</a></li>
-            <li><a asp-area="Admin" asp-controller="NhaXuatBan" asp-action="Index">🏢 Nhà xuất bản</a></li>
-            <li><a asp-area="Admin" asp-controller="TacGia" asp-action="Index">✍️ Tác giả</a></li>
-            <li><a asp-area="Admin" asp-controller="DauSach" asp-action="Index">📖 Đầu sách</a></li>
-            <li><a asp-area="Admin" asp-controller="Sach" asp-action="Index">📦 Sách (bản sao)</a></li>
-            <li><a asp-area="Admin" asp-controller="PhieuMuon" asp-action="ChoDuyet">🕒 Phiếu mượn chờ duyệt</a></li>
-            <li><a asp-area="Admin" asp-controller="PhieuTra" asp-action="Index">↩️ Trả sách</a></li>
-            <li><a asp-area="Admin" asp-controller="Phat" asp-action="Index">💰 Phạt</a></li>
-        </ul>
+                <ul class="dropdown-menu admin-dd-menu">
+                    <li><h6 class="dropdown-header">Danh mục</h6></li>
+                    <li>
+                        <a class="dropdown-item @Active("TheLoai")"
+                           asp-area="Admin" asp-controller="TheLoai" asp-action="Index">📚 Thể loại</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item @Active("NhaXuatBan")"
+                           asp-area="Admin" asp-controller="NhaXuatBan" asp-action="Index">🏢 Nhà xuất bản</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item @Active("TacGia")"
+                           asp-area="Admin" asp-controller="TacGia" asp-action="Index">✍️ Tác giả</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item @Active("DauSach")"
+                           asp-area="Admin" asp-controller="DauSach" asp-action="Index">📖 Đầu sách</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item @Active("Sach")"
+                           asp-area="Admin" asp-controller="Sach" asp-action="Index">📦 Sách (bản sao)</a>
+                    </li>
 
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header">Mượn / Trả</h6></li>
+                    <li>
+                        <a class="dropdown-item @Active("PhieuMuon")"
+                           asp-area="Admin" asp-controller="PhieuMuon" asp-action="ChoDuyet">🕒 Phiếu mượn chờ duyệt</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item @Active("PhieuTra")"
+                           asp-area="Admin" asp-controller="PhieuTra" asp-action="Index">↩️ Trả sách</a>
+                    </li>
+
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header">Tài chính</h6></li>
+                    <li>
+                        <a class="dropdown-item @Active("Phat")"
+                           asp-area="Admin" asp-controller="Phat" asp-action="Index">💰 Phạt</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <hr />
         <!-- STAT CARDS -->
         <div class="row g-4">
             <div class="col-xl-3 col-md-6 px-2">
@@ -61,35 +103,17 @@
             <div class="col-xl-3 col-md-6 px-2">
                 <div class="stat-card bg-gradient-success p-4">
                     <div class="stat-card-content">
-                        <div class="stat-label">Độc giả hoạt động</div>
-                        <div class="stat-value">@Model.DocGiaDangHoatDong</div>
+                        <div class="stat-label">TIỀN PHẠT CHƯA THANH TOÁN</div>
+                        <div class="stat-value">@Model.TongTienPhatChuaThanhToan.ToString("N0") ₫</div>
                     </div>
-                    <div class="stat-icon">👤</div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- MONEY / FINE SUMMARY -->
-        <div class="row mt-5">
-            <div class="col-lg-6 col-md-8">
-                <div class="money-card shadow-sm">
-                    <div class="money-content">
-                        <div class="money-title">TIỀN PHẠT CHƯA THANH TOÁN</div>
-
-                        <div class="money-value">
-                            @Model.TongTienPhatChuaThanhToan.ToString("N0") ₫
-                        </div>
-
-                        <div class="money-sub">
-                            Tổng số tiền phạt hiện tại chưa được thanh toán trong hệ thống
-                        </div>
-                    </div>
-
-                    <div class="money-icon">💰</div>
+                    <div class="stat-icon">💰</div>
                 </div>
             </div>
         </div>
+        <hr />
+        <div></div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 

@@ -1,24 +1,125 @@
 ﻿@model List<WebApplication1.Models.PhieuMuon>
-<h2>Phiếu mượn chờ duyệt</h2>
 
-@if (TempData["err"] != null)
-{
-     <div style="color:red">@TempData["err"]</div>
+@{
+    ViewData["Title"] = "Phiếu mượn chờ duyệt";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-@if (TempData["ok"] != null)
-{
-     <div style="color:green">@TempData["ok"]</div>
-}
-
-<table border="1" cellpadding="6">
-    <tr><th>Mã</th><th>Độc giả</th><th>Ngày mượn</th><th></th></tr>
-    @foreach (var p in Model)
-    {
-        <tr>
-            <td>@p.PhieuMuonId</td>
-            <td>@p.DocGia?.HoTen</td>
-            <td>@p.NgayMuon</td>
-            <td><a asp-action="Details" asp-route-id="@p.PhieuMuonId">Chi tiết</a></td>
-        </tr>
+<style>
+    .admin-alert {
+        border-radius: 12px;
+        margin-bottom: 12px;
     }
-</table>
+
+    .admin-status--unknown {
+        background: rgba(0,0,0,.08);
+        color: rgba(0,0,0,.65);
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .4px;
+    }
+
+    .admin-alert {
+        border-radius: 12px;
+        margin-bottom: 12px;
+    }
+
+</style>
+<div class="admin-page">
+
+    <!-- Toolbar -->
+    <div class="admin-toolbar">
+        <div class="admin-toolbar__left">
+            <h2 class="admin-title">🕒 Phiếu mượn chờ duyệt</h2>
+            <div class="admin-subtitle">Xem chi tiết để duyệt / từ chối, sau đó giao sách theo quy trình.</div>
+        </div>
+    </div>
+
+    @if (TempData["err"] != null)
+    {
+        <div class="alert alert-danger admin-alert">
+            @TempData["err"]
+        </div>
+    }
+    @if (TempData["ok"] != null)
+    {
+        <div class="alert alert-success admin-alert">
+            @TempData["ok"]
+        </div>
+    }
+
+    <div class="admin-card">
+        <div class="admin-card__body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:90px;">Mã</th>
+                            <th>Độc giả</th>
+                            <th style="width:160px;">Ngày mượn</th>
+                            <th style="width:150px;">Trạng thái</th>
+                            <th style="width:130px;" class="text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="admin-empty">
+                                    Không có phiếu mượn nào đang chờ duyệt.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var p in Model)
+                            {
+                                var st = (p.TrangThai ?? "").Trim();
+
+                                <tr>
+                                    <td class="admin-mono">#@p.PhieuMuonId</td>
+
+                                    <td>
+                                        <div class="admin-title-cell__name">
+                                            @(p.DocGia?.HoTen ?? "—")
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(p.GhiChu))
+                                        {
+                                            <div class="admin-muted" style="margin-top:4px;">
+                                                Ghi chú: @p.GhiChu
+                                            </div>
+                                        }
+                            </td>
+
+                            <td class="admin-mono">
+                                @(p.NgayMuon == default(DateTime) ? "—" : p.NgayMuon.ToString("dd/MM/yyyy"))
+                            </td>
+
+                            <td>
+                                <span class="admin-status admin-status--unknown">
+                                    @(
+                                                                        string.IsNullOrWhiteSpace(st) ? "—" : st
+                                                                        )
+                                </span>
+                            </td>
+
+                                    <td class="text-right">
+                                        <a asp-action="Details" asp-route-id="@p.PhieuMuonId"
+                                           class="btn btn-sm btn-info admin-action-btn">
+                                            Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                                                }
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

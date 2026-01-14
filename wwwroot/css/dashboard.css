@@ -119,3 +119,49 @@
     font-size: .9rem;
     color: #6c757d;
 }
+
+/* Admin Dropdown Nav */
+.admin-dd { margin: 10px 0 18px 0; }
+
+.admin-dd-btn{
+  background: linear-gradient(135deg,#2d55ff,#1cc88a);
+  color:#fff;
+  border:0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(0,0,0,.10);
+}
+
+.admin-dd-btn:hover { filter: brightness(.98); }
+.admin-dd-btn:focus { box-shadow: 0 0 0 .2rem rgba(45,85,255,.25); }
+
+.admin-dd-menu{
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.14);
+  min-width: 320px;
+}
+
+.admin-dd-menu .dropdown-header{
+  font-weight: 800;
+  color: #6c757d;
+  padding: 8px 10px 6px 10px;
+}
+
+.admin-dd-menu .dropdown-item{
+  border-radius: 12px;
+  padding: 10px 10px;
+  font-weight: 700;
+}
+
+.admin-dd-menu .dropdown-item:hover{
+  background: rgba(45,85,255,.08);
+}
+
+.admin-dd-menu .dropdown-item.is-active{
+  background: rgba(28,200,138,.14);
+  color: #0f5132;
+}
+

@@ -1,26 +1,83 @@
 ﻿@model List<WebApplication1.Models.TheLoai>
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Thể loại";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-<h2>Thể loại</h2>
-<p><a asp-action="Create">Thêm</a></p>
 
-<table border="1" cellpadding="6">
-    <tr><th>ID</th><th>Tên</th><th></th></tr>
-    @foreach (var x in Model)
-    {
-        <tr>
-            <td>@x.TheLoaiId</td>
-            <td>@x.TenTheLoai</td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@x.TheLoaiId">Sửa</a>
-                <form asp-action="Delete" method="post" style="display:inline">
-                    <input type="hidden" name="id" value="@x.TheLoaiId" />
-                    <button type="submit">Xoá</button>
-                </form>
-            </td>
-        </tr>
-    }
-</table>
+<div class="admin-page">
+
+    <!-- Toolbar -->
+    <div class="admin-toolbar">
+        <div class="admin-toolbar__left">
+            <h2 class="admin-title">📚 Thể loại</h2>
+            <div class="admin-subtitle">Quản lý danh mục thể loại sách.</div>
+        </div>
+
+        <div class="admin-toolbar__right">
+            <a asp-action="Create" class="btn btn-primary admin-btn">
+                <span class="admin-btn__icon">＋</span> Thêm thể loại
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-card__body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:90px;">ID</th>
+                            <th>Tên thể loại</th>
+                            <th style="width:190px;" class="text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="admin-empty">
+                                    Chưa có thể loại nào. Bấm <b>“Thêm thể loại”</b> để khởi tạo dữ liệu.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var x in Model)
+                            {
+                                <tr>
+                                    <td class="admin-mono">#@x.TheLoaiId</td>
+
+                                    <td>
+                                        <div class="admin-title-cell__name">
+                                            @(string.IsNullOrWhiteSpace(x.TenTheLoai) ? "—" : x.TenTheLoai)
+                                        </div>
+                                    </td>
+
+                                    <td class="text-right">
+                                        <a asp-action="Edit" asp-route-id="@x.TheLoaiId"
+                                           class="btn btn-sm btn-info admin-action-btn">
+                                            Sửa
+                                        </a>
+
+                                        <form asp-action="Delete" method="post" class="admin-inline-form"
+                                              onsubmit="return confirm('Xoá thể loại này?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@x.TheLoaiId" />
+                                            <button type="submit" class="btn btn-sm btn-danger admin-action-btn">
+                                                Xoá
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

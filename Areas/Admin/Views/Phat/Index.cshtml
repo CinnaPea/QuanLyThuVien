@@ -1,24 +1,149 @@
 ﻿@model List<WebApplication1.Models.Phat>
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Phạt";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Danh sách phạt</h2>
-
-<table border="1" cellpadding="6">
-    <tr><th>Mã</th><th>Phiếu mượn</th><th>Sách</th><th>Lý do</th><th>Số tiền</th><th>Đã TT</th><th></th></tr>
-    @foreach (var p in Model)
-    {
-        <tr>
-            <td>@p.PhatId</td>
-            <td>@p.PhieuMuonId</td>
-            <td>@p.SachId</td>
-            <td>@p.LyDo</td>
-            <td>@p.SoTien</td>
-            <td>@p.DaThanhToan</td>
-            <td><a asp-action="Details" asp-route-id="@p.PhatId">Chi tiết</a></td>
-        </tr>
+<style>
+    /* ===== Fines / Phat extras ===== */
+    .admin-money {
+        font-weight: 800;
+        letter-spacing: .2px;
     }
-</table>
+
+    .admin-reason {
+        font-weight: 600;
+        line-height: 1.25;
+    }
+
+    .admin-status {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .4px;
+    }
+
+    .admin-status--paid {
+        background: rgba(28,200,138,.18);
+        color: #0f5132;
+    }
+
+    .admin-status--unpaid {
+        background: rgba(220,53,69,.14);
+        color: #842029;
+    }
+
+    /* row hinting */
+    .admin-table tr.is-paid td {
+        opacity: .92;
+    }
+
+    .admin-table tr.is-unpaid td {
+        opacity: 1;
+    }
+
+</style>
+<div class="admin-page">
+
+    <!-- Toolbar -->
+    <div class="admin-toolbar">
+        <div class="admin-toolbar__left">
+            <h2 class="admin-title">💰 Danh sách phạt</h2>
+            <div class="admin-subtitle">Theo dõi phí phạt, trạng thái thanh toán, và tra cứu chi tiết.</div>
+        </div>
+
+        <div class="admin-toolbar__right">
+            <!-- Optional: add create/search later -->
+            @* <a asp-action="Create" class="btn btn-primary admin-btn">＋ Tạo phiếu phạt</a> *@
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-card__body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:80px;">Mã</th>
+                            <th style="width:110px;">Phiếu mượn</th>
+                            <th style="width:90px;">Sách</th>
+                            <th>Lý do</th>
+                            <th style="width:160px;" class="text-right">Số tiền</th>
+                            <th style="width:110px;" class="text-center">Đã TT</th>
+                            <th style="width:120px;" class="text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="admin-empty">
+                                    Chưa có dữ liệu phạt trong hệ thống.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var p in Model)
+                            {
+                                var paid = p.DaThanhToan == true;
+
+                                <tr class="@(paid ? "is-paid" : "is-unpaid")">
+                                    <td class="admin-mono">#@p.PhatId</td>
+
+                                    <td class="admin-mono">
+                                        <span class="admin-pill admin-pill--soft">@p.PhieuMuonId</span>
+                                    </td>
+
+                                    <td class="admin-mono">
+                                        <span class="admin-pill">@p.SachId</span>
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(p.LyDo))
+                                        {
+                                            <div class="admin-reason">@p.LyDo</div>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-right">
+                                        <span class="admin-money">
+                                            @(((decimal?)(p.SoTien) ?? 0m).ToString("N0")) ₫
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        @if (paid)
+                                        {
+                                            <span class="admin-status admin-status--paid">ĐÃ TT</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-status admin-status--unpaid">CHƯA TT</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-right">
+                                        <a asp-action="Details" asp-route-id="@p.PhatId"
+                                           class="btn btn-sm btn-info admin-action-btn">
+                                            Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

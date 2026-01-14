@@ -1,21 +1,69 @@
 ﻿@{
     ViewData["Title"] = "Đăng nhập";
-}
-<h2>Đăng nhập</h2>
-
-@if (ViewBag.Error != null)
-{
-    <div style="color:red">@ViewBag.Error</div>
+    Layout = "~/Views/Shared/_Auth.cshtml";
 }
 
-<form method="post">
-    <div>
-        <label>Tên đăng nhập</label>
-        <input name="tenDangNhap" />
+<head>
+    <link rel="stylesheet" href="~/css/login.css" />
+</head>
+<body>
+    <div class="auth-wrap">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+                    <div class="auth-card animated fadeInUp">
+                        <div class="auth-head">
+                            <div class="auth-badge">🔐</div>
+                            <h2 class="auth-title">Đăng nhập</h2>
+                            <p class="auth-sub">Vào hệ thống thư viện — nhanh gọn, đúng quy trình.</p>
+                        </div>
+
+                        @if (ViewBag.Error != null)
+                        {
+                            <div class="alert alert-danger auth-alert">
+                                @ViewBag.Error
+                            </div>
+                        }
+
+                        <form method="post" class="auth-form">
+                            @Html.AntiForgeryToken()
+
+                            <div class="form-group">
+                                <label class="auth-label">Tên đăng nhập</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon">👤</span>
+                                    <input name="tenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập" autocomplete="username" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="auth-label">Mật khẩu</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon">🔑</span>
+                                    <input name="matKhau" type="password" class="form-control" placeholder="Nhập mật khẩu" autocomplete="current-password" />
+                                </div>
+                            </div>
+
+                            <div class="auth-actions">
+                                <label class="auth-remember">
+                                    <input type="checkbox" name="remember" />
+                                    Ghi nhớ
+                                </label>
+
+                                <a class="auth-link" href="#">Quên mật khẩu?</a>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block auth-btn">
+                                Đăng nhập
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="auth-foot animated fadeIn">
+                        <small>© @DateTime.Now.Year • Library System</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <label>Mật khẩu</label>
-        <input name="matKhau" type="password" />
-    </div>
-    <button type="submit">Đăng nhập</button>
-</form>
+</body>

@@ -1,41 +1,173 @@
 ﻿@model List<WebApplication1.Models.Sach>
+
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Sách (bản sao)";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-<h2>Sách (bản sao)</h2>
 
-<p><a asp-action="Create">Thêm sách bản sao</a></p>
-
-<table border="1" cellpadding="6">
-    <tr>
-        <th>ID</th>
-        <th>Đầu sách</th>
-        <th>Mã vạch</th>
-        <th>Vị trí kệ</th>
-        <th>Ngày nhập</th>
-        <th>Tình trạng</th>
-        <th>Ghi chú</th>
-        <th></th>
-    </tr>
-
-    @foreach (var x in Model)
-    {
-        <tr>
-            <td>@x.SachId</td>
-            <td>@x.DauSach?.TieuDe</td>
-            <td>@x.MaVach</td>
-            <td>@x.ViTriKe</td>
-            <td>@x.NgayNhap</td>
-            <td>@x.TinhTrang</td>
-            <td>@x.GhiChu</td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@x.SachId">Sửa</a>
-                <form asp-action="Delete" method="post" style="display:inline">
-                    <input type="hidden" name="id" value="@x.SachId" />
-                    <button type="submit">Xoá</button>
-                </form>
-            </td>
-        </tr>
+<style>
+    /* ===== Sach (inventory) extras ===== */
+    .admin-note {
+        font-weight: 600;
+        line-height: 1.25;
     }
-</table>
+
+    /* richer status palette */
+    .admin-status--ok {
+        background: rgba(28,200,138,.18);
+        color: #0f5132;
+    }
+
+    .admin-status--info {
+        background: rgba(54,185,204,.16);
+        color: #055160;
+    }
+
+    .admin-status--warn {
+        background: rgba(246,194,62,.22);
+        color: #664d03;
+    }
+
+    .admin-status--danger {
+        background: rgba(220,53,69,.16);
+        color: #842029;
+    }
+
+</style>
+<div class="admin-page">
+
+    <!-- Toolbar -->
+    <div class="admin-toolbar">
+        <div class="admin-toolbar__left">
+            <h2 class="admin-title">📦 Sách (bản sao)</h2>
+            <div class="admin-subtitle">Quản lý kho bản sao: mã vạch, vị trí kệ, ngày nhập, tình trạng.</div>
+        </div>
+
+        <div class="admin-toolbar__right">
+            <a asp-action="Create" class="btn btn-primary admin-btn">
+                <span class="admin-btn__icon">＋</span> Thêm sách bản sao
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-card__body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:80px;">ID</th>
+                            <th>Đầu sách</th>
+                            <th style="width:160px;">Mã vạch</th>
+                            <th style="width:140px;">Vị trí kệ</th>
+                            <th style="width:140px;">Ngày nhập</th>
+                            <th style="width:130px;" class="text-center">Tình trạng</th>
+                            <th>Ghi chú</th>
+                            <th style="width:190px;" class="text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="admin-empty">
+                                    Chưa có bản sao sách nào. Bấm <b>“Thêm sách bản sao”</b> để khởi tạo dữ liệu.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var x in Model)
+                            {
+                                // Normalize status text for pill styling
+                                var status = (x.TinhTrang ?? "").Trim().ToLowerInvariant();
+                                var statusClass =
+                                status.Contains("mất") ? "admin-status--danger" :
+                                (status.Contains("hư") || status.Contains("hong") || status.Contains("rách") || status.Contains("rach")) ? "admin-status--warn" :
+                                (status.Contains("đang") || status.Contains("dang") || status.Contains("mượn") || status.Contains("muon")) ? "admin-status--info" :
+                                "admin-status--ok";
+
+                                <tr>
+                                    <td class="admin-mono">#@x.SachId</td>
+
+                                    <td>
+                                        <div class="admin-title-cell__name">
+                                            @(x.DauSach?.TieuDe ?? "—")
+                                        </div>
+                                    </td>
+
+                                    <td class="admin-mono">
+                                        @if (!string.IsNullOrWhiteSpace(x.MaVach))
+                                        {
+                                            <span class="admin-pill admin-pill--isbn">@x.MaVach</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(x.ViTriKe))
+                                        {
+                                            <span class="admin-pill admin-pill--soft">@x.ViTriKe</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td class="admin-mono">
+                                        @(x.NgayNhap == DateOnly.FromDayNumber(DateTime.Now.Day) ? "—" : x.NgayNhap.ToString())
+                                    </td>
+
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrWhiteSpace(x.TinhTrang))
+                                        {
+                                            <span class="admin-status @statusClass">@x.TinhTrang</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-status admin-status--unknown">CHƯA RÕ</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(x.GhiChu))
+                                        {
+                                            <div class="admin-note">@x.GhiChu</div>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-right">
+                                        <a asp-action="Edit" asp-route-id="@x.SachId"
+                                           class="btn btn-sm btn-info admin-action-btn">
+                                            Sửa
+                                        </a>
+
+                                        <form asp-action="Delete" method="post" class="admin-inline-form"
+                                              onsubmit="return confirm('Xoá bản sao sách này?');">
+                                            <input type="hidden" name="id" value="@x.SachId" />
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-danger admin-action-btn">
+                                                Xoá
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
