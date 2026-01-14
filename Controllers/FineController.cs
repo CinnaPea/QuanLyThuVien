@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using WebApplication1;
 
-namespace LibraryManagement.Controllers
+namespace WebApplication1.Controllers
 {
     [Authorize]
     public class FineController : Controller

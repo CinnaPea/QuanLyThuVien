@@ -15,6 +15,7 @@ namespace LibraryManagement.Controllers
             var query = _db.DauSaches
                 .Include(x => x.TheLoai)
                 .Include(x => x.NhaXuatBan)
+                .Include(x => x.Saches)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(q))
