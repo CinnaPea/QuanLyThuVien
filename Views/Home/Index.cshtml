@@ -1,121 +1,128 @@
 ﻿@model List<DauSach>
 @{
     ViewData["Title"] = "Thư viện online";
+    Layout = "~/Views/Shared/_Auth.cshtml";
 }
 
-<link rel="stylesheet" href="~/css/library-home.css" />
+<head>
+    <link rel="stylesheet" href="~/css/library-home.css" />
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a class="brand" asp-controller="Home" asp-action="Index">
+                <div class="logo">LB</div>
+                <div>
+                    <b>Library Online</b><br />
+                    <small>Tra cứu & mượn sách nhanh</small>
+                </div>
+            </a>
 
-<header class="header">
-    <div class="header-inner">
-        <a class="brand" asp-controller="Home" asp-action="Index">
-            <div class="logo">LB</div>
-            <div>
-                <b>Library Online</b><br />
-                <small>Tra cứu & mượn sách nhanh</small>
+            <nav class="nav">
+                <a class="btn" asp-controller="Book" asp-action="Index">📚 Sách</a>
+                <a class="btn" asp-controller="Borrow" asp-action="Cart">🧺 Giỏ mượn</a>
+                <a class="btn primary" asp-controller="Account" asp-action="Login">🔐 Đăng nhập</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero"
+             style="background-image:url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80')">
+        <div class="hero-overlay">
+            <h1>Thư viện Online</h1>
+            <p>Tra cứu nhanh – Tạo giỏ mượn – Lập phiếu mượn online – Đến thư viện nhận sách</p>
+
+
+        </div>
+    </section>
+
+    <div class="container">
+
+        <div class="section-title">
+            <h3>Điểm nổi bật của thư viện</h3>
+            <span class="muted">Không gian • tài nguyên • trải nghiệm</span>
+        </div>
+
+        <!-- Showcase images -->
+        <div class="showcase">
+            <div class="shot big"
+                 style="background-image:url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1400&q=80')">
+                <div class="shot-overlay">
+                    <b>Không gian đọc yên tĩnh</b>
+                    <small>Tập trung học tập, tự học hiệu quả</small>
+                </div>
             </div>
-        </a>
 
-        <nav class="nav">
-            <a class="btn" asp-controller="Book" asp-action="Index">📚 Sách</a>
-            <a class="btn" asp-controller="Borrow" asp-action="Cart">🧺 Giỏ mượn</a>
-            <a class="btn primary" asp-controller="Account" asp-action="Login">🔐 Đăng nhập</a>
-        </nav>
+            <div class="shot"
+                 style="background-image:url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1400&q=80')">
+                <div class="shot-overlay">
+                    <b>Kho sách đa dạng</b>
+                    <small>Cập nhật thường xuyên</small>
+                </div>
+            </div>
+
+            <div class="shot"
+                 style="background-image:url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1400&q=80')">
+                <div class="shot-overlay">
+                    <b>Trải nghiệm hiện đại</b>
+                    <small>Tra cứu & tạo phiếu mượn online</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature cards -->
+        <div class="feature-grid">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div>
+                    <b>Mượn nhanh</b>
+                    <p>Chọn sách → Thêm vào giỏ → Lập phiếu mượn → Đến thư viện nhận</p>
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔎</div>
+                <div>
+                    <b>Tìm kiếm thông minh</b>
+                    <p>Tìm theo tiêu đề/ISBN, lọc theo tác giả, NXB, thể loại</p>
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🧾</div>
+                <div>
+                    <b>Minh bạch</b>
+                    <p>Theo dõi giỏ mượn, phiếu mượn và lịch sử mượn</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ads giữ nguyên -->
+        <div class="ads">
+            <div class="ad"
+                 style="background-image:url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1000&q=80')">
+                <div>
+                    <h4>Không gian đọc hiện đại</h4>
+                    <p>Phòng đọc yên tĩnh – wifi mạnh – khu tự học rộng</p>
+                </div>
+            </div>
+
+            <div class="ad"
+                 style="background-image:url('https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1000&q=80')">
+                <div>
+                    <h4>Hàng nghìn đầu sách</h4>
+                    <p>Cập nhật sách mới mỗi tháng</p>
+                </div>
+            </div>
+
+            <div class="ad"
+                 style="background-image:url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1000&q=80')">
+                <div>
+                    <h4>Đăng ký thẻ thư viện</h4>
+                    <p>Đăng ký nhanh – mượn nhiều – trả dễ</p>
+                </div>
+            </div>
+        </div>
     </div>
-</header>
+</body>
+<!-- ✅ always last -->
 
-<section class="hero"
-         style="background-image:url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80')">
-    <div class="hero-overlay">
-        <h1>Thư viện Online</h1>
-        <p>Tra cứu nhanh – Tạo giỏ mượn – Lập phiếu mượn online – Đến thư viện nhận sách</p>
 
-       
-    </div>
-</section>
-
-<div class="container">
-
-    <div class="section-title">
-        <h3>Điểm nổi bật của thư viện</h3>
-        <span class="muted">Không gian • tài nguyên • trải nghiệm</span>
-    </div>
-
-    <!-- Showcase images -->
-    <div class="showcase">
-        <div class="shot big"
-             style="background-image:url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1400&q=80')">
-            <div class="shot-overlay">
-                <b>Không gian đọc yên tĩnh</b>
-                <small>Tập trung học tập, tự học hiệu quả</small>
-            </div>
-        </div>
-
-        <div class="shot"
-             style="background-image:url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1400&q=80')">
-            <div class="shot-overlay">
-                <b>Kho sách đa dạng</b>
-                <small>Cập nhật thường xuyên</small>
-            </div>
-        </div>
-
-        <div class="shot"
-             style="background-image:url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1400&q=80')">
-            <div class="shot-overlay">
-                <b>Trải nghiệm hiện đại</b>
-                <small>Tra cứu & tạo phiếu mượn online</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- Feature cards -->
-    <div class="feature-grid">
-        <div class="feature">
-            <div class="feature-icon">⚡</div>
-            <div>
-                <b>Mượn nhanh</b>
-                <p>Chọn sách → Thêm vào giỏ → Lập phiếu mượn → Đến thư viện nhận</p>
-            </div>
-        </div>
-        <div class="feature">
-            <div class="feature-icon">🔎</div>
-            <div>
-                <b>Tìm kiếm thông minh</b>
-                <p>Tìm theo tiêu đề/ISBN, lọc theo tác giả, NXB, thể loại</p>
-            </div>
-        </div>
-        <div class="feature">
-            <div class="feature-icon">🧾</div>
-            <div>
-                <b>Minh bạch</b>
-                <p>Theo dõi giỏ mượn, phiếu mượn và lịch sử mượn</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Ads giữ nguyên -->
-    <div class="ads">
-        <div class="ad"
-             style="background-image:url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1000&q=80')">
-            <div>
-                <h4>Không gian đọc hiện đại</h4>
-                <p>Phòng đọc yên tĩnh – wifi mạnh – khu tự học rộng</p>
-            </div>
-        </div>
-
-        <div class="ad"
-             style="background-image:url('https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1000&q=80')">
-            <div>
-                <h4>Hàng nghìn đầu sách</h4>
-                <p>Cập nhật sách mới mỗi tháng</p>
-            </div>
-        </div>
-
-        <div class="ad"
-             style="background-image:url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1000&q=80')">
-            <div>
-                <h4>Đăng ký thẻ thư viện</h4>
-                <p>Đăng ký nhanh – mượn nhiều – trả dễ</p>
-            </div>
-        </div>
-    </div>
-</div>

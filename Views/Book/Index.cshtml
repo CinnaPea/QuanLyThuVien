@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = "Danh sách sách";
-
+    Layout = "~/Views/Shared/_Auth.cshtml";
     var theLoais = ViewBag.TheLoais as List<TheLoai> ?? new();
     var nhaXuatBans = ViewBag.NhaXuatBans as List<NhaXuatBan> ?? new();
     var tacGias = ViewBag.TacGias as List<TacGium> ?? new();
@@ -15,6 +15,7 @@
 }
 
 <link rel="stylesheet" href="~/css/library-home.css" />
+<link rel="stylesheet" href="~/css/library-display.css" />
 
 <header class="header">
     <div class="header-inner">

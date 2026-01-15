@@ -1,0 +1,178 @@
+﻿/* =========================
+   CART (Borrow/Cart) UI
+   Paste at END of library-home.css
+   ========================= */
+
+.topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 10px 0 14px;
+}
+
+.topbar-title h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: .2px;
+}
+
+.alertx {
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  margin: 12px 0;
+  box-shadow: 0 12px 30px rgba(0,0,0,.22);
+  color: var(--text);
+}
+
+.alertx.ok {
+  border-color: rgba(166,255,77,.22);
+  background: rgba(166,255,77,.08);
+}
+
+.alertx.err {
+  border-color: rgba(239,68,68,.25);
+  background: rgba(239,68,68,.10);
+}
+
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1.35fr .65fr;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+@media (max-width: 980px) {
+  .cart-layout { grid-template-columns: 1fr; }
+}
+
+/* Left: table card */
+.cart-card,
+.checkout-card {
+  border-radius: var(--radius2);
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.cart-head,
+.checkout-head {
+  padding: 14px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: rgba(10,16,28,.35);
+}
+
+.cart-head h3,
+.checkout-head h3 {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: .2px;
+}
+
+.cart-table-wrap {
+  overflow: auto;
+}
+
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cart-table thead th {
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: rgba(234,240,255,.72);
+  padding: 12px 14px;
+  background: rgba(255,255,255,.03);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  white-space: nowrap;
+}
+
+.cart-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  vertical-align: middle;
+}
+
+.cart-table tbody tr:hover {
+  background: rgba(255,255,255,.03);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12.5px;
+  color: rgba(234,240,255,.82);
+}
+
+.titlecell {
+  font-weight: 800;
+  color: rgba(234,240,255,.92);
+}
+
+.text-right { text-align: right; }
+
+.inline { display: inline-block; margin: 0; }
+
+/* Buttons (reuse your .btn baseline, add danger) */
+.btn.danger {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(239,68,68,.25);
+  color: rgba(234,240,255,.92);
+}
+
+.btn.danger:hover {
+  border-color: rgba(239,68,68,.35);
+  filter: brightness(1.04);
+}
+
+/* Right: checkout card */
+.checkout-form {
+  padding: 14px;
+}
+
+.checkout-form .field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 6px;
+  color: rgba(234,240,255,.86);
+}
+
+.checkout-form .field input {
+  width: 100%;
+  height: 44px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(2,6,23,.55);
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.checkout-form .field input::placeholder {
+  color: rgba(234,240,255,.45);
+}
+
+.checkout-form .field input:focus {
+  border-color: rgba(166,255,77,.40);
+  box-shadow: 0 0 0 4px rgba(166,255,77,.14);
+}
+
+.w-100 { width: 100%; }
+
+.checkout-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(166,255,77,.12);
+  background: rgba(166,255,77,.07);
+  color: rgba(234,240,255,.78);
+  font-size: 13px;
+  line-height: 1.45;
+}

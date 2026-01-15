@@ -1,46 +1,98 @@
 ﻿@model DauSach
 @{
+    ViewData["Title"] = Model?.TieuDe ?? "Chi tiết sách";
+    Layout = "~/Views/Shared/_Auth.cshtml";
     var sachCon = ViewBag.SachCon as List<Sach> ?? new();
 }
 
-<h2>@Model.TieuDe</h2>
-<p>ISBN: @Model.Isbn</p>
-<p>Thể loại: @Model.TheLoai?.TenTheLoai</p>
-<p>NXB: @Model.NhaXuatBan?.TenNxb
+<link rel="stylesheet" href="~/css/library-home.css" />
+<link rel="stylesheet" href="~/css/library-bookdetail.css"/>
 
-@if (TempData["err"] != null)
-{
-     <div style="color:red">@TempData["err"]</div>
-}
-@if (TempData["ok"] != null)
-{
-     <div style="color:green">@TempData["ok"]</div>
-}
 
-<h3>Bản sao còn trong thư viện</h3>
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" asp-controller="Home" asp-action="Index">
+            <div class="logo">LB</div>
+            <div>
+                <b>Library Online</b><br />
+                <small>Giỏ mượn</small>
+            </div>
+        </a>
 
-@if (!sachCon.Any())
-{
-    <p><i>Hết bản sao để mượn.</i></p>
-}
-else
-{
-    <table border="1" cellpadding="6">
-        <tr><th>Mã sách</th><th>Vị trí</th><th></th></tr>
-        @foreach (var s in sachCon)
+        <nav class="nav">
+            <a class="btn" asp-controller="Home" asp-action="Index">🏠 Trang chủ</a>
+            <a class="btn" asp-controller="Book" asp-action="Index">📚 Sách</a>
+            <a class="btn primary" asp-controller="Borrow" asp-action="Cart">🧺 Giỏ mượn</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container book-detail">
+
+    <section class="detail-hero">
+        <div class="detail-hero__bg"></div>
+
+        <div class="detail-hero__content">
+            <h2 class="detail-title">@Model.TieuDe</h2>
+
+            <div class="detail-meta">
+                <span class="meta-chip"><b>ISBN:</b> @Model.Isbn</span>
+                <span class="meta-chip"><b>Thể loại:</b> @Model.TheLoai?.TenTheLoai</span>
+                <span class="meta-chip"><b>NXB:</b> @Model.NhaXuatBan?.TenNxb</span>
+            </div>
+
+            @if (TempData["err"] != null)
+            {
+                <div class="notice notice--err">@TempData["err"]</div>
+            }
+            @if (TempData["ok"] != null)
+            {
+                <div class="notice notice--ok">@TempData["ok"]</div>
+            }
+        </div>
+    </section>
+
+    <section class="detail-section">
+        <h3 class="detail-h3">Bản sao còn trong thư viện</h3>
+
+        @if (!sachCon.Any())
         {
-            <tr>
-                <td>@s.SachId</td>
-                <td>@s.ViTriKe</td>
-                <td>
-                    <form asp-controller="Borrow" asp-action="AddToCart" method="post">
-                        <input type="hidden" name="sachId" value="@s.SachId" />
-                        <button type="submit">Thêm vào giỏ</button>
-                    </form>
-                </td>
-            </tr>
+            <div class="empty">
+                <b><i>Hết bản sao để mượn.</i></b>
+            </div>
         }
-    </table>
-}
+        else
+        {
+            <div class="copies">
+                @foreach (var s in sachCon)
+                {
+                    <div class="copy-card">
+                        <div class="copy-card__left">
+                            <div class="copy-kv">
+                                <div class="copy-k">Mã sách</div>
+                                <div class="copy-v">@s.SachId</div>
+                            </div>
 
-<p><a asp-controller="Borrow" asp-action="Cart">Xem giỏ mượn</a></p>
+                            <div class="copy-kv">
+                                <div class="copy-k">Vị trí</div>
+                                <div class="copy-v">@s.ViTriKe</div>
+                            </div>
+                        </div>
+
+                        <div class="copy-card__right">
+                            <form asp-controller="Borrow" asp-action="AddToCart" method="post" class="copy-form">
+                                <input type="hidden" name="sachId" value="@s.SachId" />
+                                <button type="submit" class="btn primary copy-btn">🧺 Thêm vào giỏ</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="detail-footer">
+            <a class="btn detail-cart-link" asp-controller="Borrow" asp-action="Cart">Xem giỏ mượn</a>
+        </div>
+    </section>
+
+</div>

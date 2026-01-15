@@ -1,44 +1,119 @@
 ﻿@model List<Sach>
 
-<h2>Giỏ mượn</h2>
-
-@if (TempData["ok"] != null)
-{
-     <div style="color:green">@TempData["ok"]</div>
-}
-@if (TempData["err"] != null)
-{
-     <div style="color:red">@TempData["err"]</div>
+@{
+    ViewData["Title"] = "Giỏ mượn";
+    Layout = "~/Views/Shared/_Auth.cshtml";
 }
 
-@if (!Model.Any())
-{
-    <p>Giỏ trống.</p>
-}
-else
-{
-    <table border="1" cellpadding="6">
-        <tr><th>Mã sách</th><th>Đầu sách</th><th></th></tr>
-        @foreach (var s in Model)
-        {
-            <tr>
-                <td>@s.SachId</td>
-                <td>@s.DauSach?.TieuDe</td>
-                <td>
-                    <form method="post" asp-action="Remove">
-                        <input type="hidden" name="sachId" value="@s.SachId" />
-                        <button type="submit">Bỏ</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </table>
+<link rel="stylesheet" href="~/css/library-home.css" />
+<link rel="stylesheet" href="~/css/library-cart.css" />
 
-    <form method="post" asp-action="CreatePhieuMuonOnline">
-        <div>
-            <label>Ghi chú</label>
-            <input name="ghiChu" />
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" asp-controller="Home" asp-action="Index">
+            <div class="logo">LB</div>
+            <div>
+                <b>Library Online</b><br />
+                <small>Giỏ mượn</small>
+            </div>
+        </a>
+
+        <nav class="nav">
+            <a class="btn" asp-controller="Home" asp-action="Index">🏠 Trang chủ</a>
+            <a class="btn" asp-controller="Book" asp-action="Index">📚 Sách</a>
+            <a class="btn primary" asp-controller="Borrow" asp-action="Cart">🧺 Giỏ mượn</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="topbar">
+        <div class="topbar-title">
+            <h2>Giỏ mượn</h2>
+            <span class="muted">Xem lại sách đã chọn và tạo phiếu mượn online</span>
         </div>
-        <button type="submit">Tạo phiếu mượn online</button>
-    </form>
-}
+    </div>
+
+    @if (TempData["ok"] != null)
+    {
+        <div class="alertx ok">@TempData["ok"]</div>
+    }
+    @if (TempData["err"] != null)
+    {
+        <div class="alertx err">@TempData["err"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="empty">
+            <b>Giỏ trống.</b>
+            <div class="muted">Hãy quay lại danh sách sách để thêm vào giỏ.</div>
+            <div style="margin-top:12px;">
+                <a class="btn primary" asp-controller="Book" asp-action="Index">📚 Đi đến danh sách sách</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="cart-layout">
+
+            <div class="cart-card">
+                <div class="cart-head">
+                    <div>
+                        <h3>Danh sách sách trong giỏ</h3>
+                        <span class="muted">@Model.Count cuốn</span>
+                    </div>
+                </div>
+
+                <div class="cart-table-wrap">
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th style="width:120px;">Mã sách</th>
+                                <th>Đầu sách</th>
+                                <th style="width:120px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in Model)
+                            {
+                                <tr>
+                                    <td class="mono">@s.SachId</td>
+                                    <td class="titlecell">@((s.DauSach?.TieuDe) ?? "-")</td>
+                                    <td class="text-right">
+                                        <form method="post" asp-action="Remove" class="inline">
+                                            <input type="hidden" name="sachId" value="@s.SachId" />
+                                            <button type="submit" class="btn danger">Bỏ</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <aside class="checkout-card">
+                <div class="checkout-head">
+                    <h3>Tạo phiếu mượn</h3>
+                    <div class="muted">Kiểm tra lại trước khi gửi</div>
+                </div>
+
+                <form method="post" asp-action="CreatePhieuMuonOnline" class="checkout-form">
+                    <div class="field">
+                        <label>Ghi chú</label>
+                        <input name="ghiChu" placeholder="Ví dụ: mượn 7 ngày, nhận tại quầy A..." />
+                    </div>
+
+                    <button type="submit" class="btn primary w-100">🧾 Tạo phiếu mượn online</button>
+
+                    <div class="checkout-note">
+                        Phiếu mượn sẽ được tạo online — bạn đến thư viện để nhận sách.
+                    </div>
+                </form>
+            </aside>
+
+        </div>
+    }
+</div>

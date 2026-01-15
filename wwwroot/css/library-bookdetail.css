@@ -1,0 +1,210 @@
+﻿/* =========================
+   BOOK DETAILS (YenPress-ish)
+   Append to END of library-home.css
+   ========================= */
+
+.book-detail {
+    padding-top: 18px;
+}
+
+/* Hero card */
+.detail-hero {
+    position: relative;
+    border-radius: var(--radius2);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: var(--shadow);
+    margin: 10px 0 18px;
+}
+
+.detail-hero__bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(900px 520px at 18% 10%, rgba(166,255,77,.14), transparent 60%), radial-gradient(900px 520px at 86% 25%, rgba(67,201,107,.10), transparent 60%), linear-gradient(180deg, rgba(10,16,28,.35), rgba(10,16,28,.82)), url("https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+    filter: saturate(1.05);
+    transform: scale(1.02);
+}
+
+.detail-hero__content {
+    position: relative;
+    padding: 22px 20px 18px;
+    backdrop-filter: blur(10px);
+}
+
+.detail-title {
+    margin: 0 0 10px;
+    font-size: clamp(22px, 2.4vw, 34px);
+    letter-spacing: .2px;
+    color: var(--text);
+    text-shadow: 0 12px 40px rgba(0,0,0,.55);
+}
+
+.detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0 0 12px;
+}
+
+.meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(10,16,28,.52);
+    color: rgba(234,240,255,.86);
+    font-size: 13px;
+    backdrop-filter: blur(10px);
+}
+
+    .meta-chip b {
+        color: rgba(234,240,255,.92);
+    }
+
+/* Notices */
+.notice {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(10,16,28,.55);
+    font-weight: 700;
+    font-size: 13px;
+    backdrop-filter: blur(10px);
+}
+
+.notice--ok {
+    border-color: rgba(166,255,77,.24);
+    background: rgba(166,255,77,.10);
+    color: rgba(234,240,255,.92);
+}
+
+.notice--err {
+    border-color: rgba(239,68,68,.30);
+    background: rgba(239,68,68,.12);
+    color: rgba(234,240,255,.92);
+}
+
+/* Section */
+.detail-section {
+    margin-top: 10px;
+}
+
+.detail-h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    letter-spacing: .2px;
+    color: var(--text);
+}
+
+/* Copies list */
+.copies {
+    display: grid;
+    gap: 12px;
+    margin: 12px 0 14px;
+}
+
+.copy-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 14px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.05);
+    box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    transition: transform .16s ease, background .16s ease, border-color .16s ease;
+    animation: fadeUp .6s ease both;
+}
+
+    .copy-card:hover {
+        transform: translateY(-2px);
+        background: rgba(255,255,255,.07);
+        border-color: rgba(166,255,77,.16);
+    }
+
+.copy-card__left {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.copy-kv {
+    min-width: 140px;
+}
+
+.copy-k {
+    font-size: 12px;
+    color: rgba(234,240,255,.60);
+    margin-bottom: 3px;
+}
+
+.copy-v {
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(234,240,255,.92);
+    word-break: break-word;
+}
+
+.copy-card__right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.copy-form {
+    margin: 0;
+}
+
+.copy-btn {
+    white-space: nowrap;
+}
+
+/* Footer CTA */
+.detail-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.detail-cart-link {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 12px 28px rgba(0,0,0,.25);
+}
+
+    .detail-cart-link:hover {
+        border-color: rgba(166,255,77,.22);
+        background: rgba(255,255,255,.10);
+    }
+
+/* Mobile */
+@media (max-width: 720px) {
+    .copy-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .copy-card__right {
+        justify-content: stretch;
+    }
+
+    .copy-btn {
+        width: 100%;
+    }
+
+    .detail-footer {
+        justify-content: stretch;
+    }
+
+    .detail-cart-link {
+        width: 100%;
+        justify-content: center;
+    }
+}
