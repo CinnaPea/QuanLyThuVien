@@ -1,31 +1,13 @@
 ﻿@model List<DauSach>
 @{
     ViewData["Title"] = "Thư viện online";
-    Layout = "~/Views/Shared/_Auth.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <head>
     <link rel="stylesheet" href="~/css/library-home.css" />
 </head>
 <body>
-    <header class="header">
-        <div class="header-inner">
-            <a class="brand" asp-controller="Home" asp-action="Index">
-                <div class="logo">LB</div>
-                <div>
-                    <b>Library Online</b><br />
-                    <small>Tra cứu & mượn sách nhanh</small>
-                </div>
-            </a>
-
-            <nav class="nav">
-                <a class="btn" asp-controller="Book" asp-action="Index">📚 Sách</a>
-                <a class="btn" asp-controller="Borrow" asp-action="Cart">🧺 Giỏ mượn</a>
-                <a class="btn primary" asp-controller="Account" asp-action="Login">🔐 Đăng nhập</a>
-            </nav>
-        </div>
-    </header>
-
     <section class="hero"
              style="background-image:url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80')">
         <div class="hero-overlay">
