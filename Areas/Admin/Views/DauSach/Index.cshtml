@@ -1,4 +1,4 @@
-﻿@model List<WebApplication1.Models.DauSach>
+﻿@model List<WebApplication1.VMs.DauSachListItemVM>
 
 @{
     ViewData["Title"] = "Đầu sách";
@@ -7,8 +7,8 @@
 
 <style>
     /* =========================
-       Admin CRUD Page (DauSach)
-       ========================= */
+           Admin CRUD Page (DauSach)
+           ========================= */
     .admin-page {
         padding: 10px 0 30px;
     }
@@ -105,7 +105,7 @@
     }
 
     .admin-pill--soft {
-        background: rgba(255,195,0,.18); /* “corporate gold” */
+        background: rgba(255,195,0,.18);
     }
 
     .admin-pill--isbn {
@@ -129,7 +129,6 @@
         color: rgba(0,0,0,.55);
         background: #fff;
     }
-
 </style>
 
 <div class="admin-page">
@@ -157,10 +156,10 @@
                             <th style="width: 70px;">ID</th>
                             <th>Tiêu đề</th>
                             <th style="width: 160px;">ISBN</th>
-                            <th style="width: 110px;">Năm XB</th>
-                            <th style="width: 130px;">Ngôn ngữ</th>
+                            <th style="width: 110px;">Tác giả</th>
                             <th style="width: 160px;">Thể loại</th>
                             <th style="width: 180px;">NXB</th>
+                            <th style="width: 160px;">Số lượng</th>
                             <th style="width: 170px;" class="text-right">Thao tác</th>
                         </tr>
                     </thead>
@@ -187,10 +186,11 @@
                                         </div>
                                     </td>
 
+
                                     <td class="admin-mono">
-                                        @if (!string.IsNullOrWhiteSpace(x.Isbn))
+                                        @if (!string.IsNullOrWhiteSpace(x.ISBN))
                                         {
-                                            <span class="admin-pill admin-pill--isbn">@x.Isbn</span>
+                                            <span class="admin-pill admin-pill--isbn">@x.ISBN</span>
                                         }
                                         else
                                         {
@@ -199,9 +199,9 @@
                                     </td>
 
                                     <td>
-                                        @if (x.NamXuatBan != null)
+                                        @if (!string.IsNullOrWhiteSpace(x.TacGiaText))
                                         {
-                                            <span class="admin-pill">@x.NamXuatBan</span>
+                                            <span class="admin-pill">@x.TacGiaText</span>
                                         }
                                         else
                                         {
@@ -209,21 +209,11 @@
                                         }
                                     </td>
 
-                                    <td>
-                                        @if (!string.IsNullOrWhiteSpace(x.NgonNgu))
-                                        {
-                                            <span class="admin-pill">@x.NgonNgu</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="admin-muted">—</span>
-                                        }
-                                    </td>
 
                                     <td>
-                                        @if (x.TheLoai != null)
+                                        @if (!string.IsNullOrWhiteSpace(x.TenTheLoai))
                                         {
-                                            <span class="admin-pill admin-pill--soft">@x.TheLoai.TenTheLoai</span>
+                                            <span class="admin-pill admin-pill--soft">@x.TenTheLoai</span>
                                         }
                                         else
                                         {
@@ -232,14 +222,19 @@
                                     </td>
 
                                     <td>
-                                        @if (x.NhaXuatBan != null)
+                                        @if (!string.IsNullOrWhiteSpace(x.TenNXB))
                                         {
-                                            <span class="admin-pill admin-pill--soft">@x.NhaXuatBan.TenNxb</span>
+                                            <span class="admin-pill admin-pill--soft">@x.TenNXB</span>
                                         }
                                         else
                                         {
                                             <span class="admin-muted">Chưa gán</span>
                                         }
+                                    </td>
+                                    <!-- Số lượng = count bản sao -->
+                                    <td class="admin-mono">
+                                        <span class="admin-pill">@x.TotalCount</span>
+                                        <span class="admin-muted"> (Còn: @x.AvailableCount)</span>
                                     </td>
 
                                     <td class="text-right">
@@ -265,7 +260,6 @@
                                             </button>
                                         </form>
                                     </td>
-
                                 </tr>
                             }
                         }

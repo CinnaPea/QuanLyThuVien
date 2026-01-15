@@ -1,4 +1,4 @@
-﻿@model WebApplication1.Models.DauSach
+﻿@model WebApplication1.VMs.DauSachFormVM
 
 @{
     ViewData["Title"] = "Thêm đầu sách";
@@ -60,6 +60,15 @@
                                 <option value="">— Chọn thể loại —</option>
                             </select>
                             <span asp-validation-for="TheLoaiId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group admin-fg">
+                            <label class="control-label">Tác giả</label>
+                            <select asp-for="TacGiaIds" asp-items="ViewBag.TacGiaIds" class="form-control" multiple>
+                                <!-- multi select doesn't use the placeholder option the same way; optional -->
+                            </select>
+                            <small class="admin-muted">Giữ Ctrl để chọn nhiều tác giả</small>
+                            <span asp-validation-for="TacGiaIds" class="text-danger"></span>
                         </div>
 
                         <div class="form-group admin-fg">
