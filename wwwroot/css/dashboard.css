@@ -15,7 +15,7 @@
 }
 
 .stat-card-content {
-    padding: 28px 28px 32px 28px; /* 👈 safe padding */
+    padding: 28px 28px 32px 28px;
 }
 
 .stat-label {
@@ -120,7 +120,7 @@
     color: #6c757d;
 }
 
-/* Admin Dropdown Nav */
+
 .admin-dd { margin: 10px 0 18px 0; }
 
 .admin-dd-btn{

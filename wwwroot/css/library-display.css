@@ -1,9 +1,4 @@
-﻿/* =========================================================
-   BOOK INDEX (Book/Index) — same design system as Home
-   Paste at END of library-home.css
-   ========================================================= */
-
-/* Vietnamese-friendly font (you already load it in <head>) */
+﻿
 body {
     font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
 }

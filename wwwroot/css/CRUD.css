@@ -36,17 +36,17 @@
     font-weight: 900;
     transform: translateY(-1px);
 }
-/* Form card spacing */
+
 .admin-card.admin-form-card{
   padding: 10px 20px 25px 70px;
 }
 
-/* Keep the rounded card from getting “visual overflow” on wide children */
+
 .admin-card.admin-form-card *{
   max-width: 100%;
 }
 
-/* If any images appear inside forms, keep them responsive */
+
 .admin-card.admin-form-card img{
   max-width: 100%;
   height: auto;
@@ -155,21 +155,21 @@
     padding-right: 22px;
   }
 }
-/* Uniform action buttons in tables */
+
 .admin-action-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 34px; /* consistent height */
-    min-width: 92px; /* consistent width */
-    padding: 0 12px; /* consistent padding */
+    height: 34px; 
+    min-width: 92px; 
+    padding: 0 12px; 
     border-radius: 10px;
     font-weight: 800;
     letter-spacing: .2px;
     line-height: 1;
 }
 
-/* keep spacing between buttons (anchor + form) */
+
 .admin-inline-form {
     display: inline-block;
     margin: 0 0 0 8px;
