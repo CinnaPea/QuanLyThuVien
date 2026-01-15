@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
+using WebApplication1.VMs;
 
 namespace WebApplication1.Areas.Admin.Controllers
 {
@@ -22,93 +23,329 @@ namespace WebApplication1.Areas.Admin.Controllers
                 .ToListAsync();
             return View(list);
         }
-
-        public async Task<IActionResult> ReturnForm(int id) // id = PhieuMuonId
+        public async Task<IActionResult> ReturnForm(int id)
         {
             var phieu = await _db.PhieuMuons
                 .Include(x => x.DocGia)
                 .FirstOrDefaultAsync(x => x.PhieuMuonId == id);
+
             if (phieu == null) return NotFound();
+            if (phieu.TrangThai != "DangMuon")
+            {
+                TempData["err"] = "Chỉ lập phiếu trả cho phiếu đang mượn.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var ct = await _db.CtPhieuMuons
                 .Include(x => x.Sach).ThenInclude(s => s.DauSach)
                 .Where(x => x.PhieuMuonId == id)
                 .ToListAsync();
 
-            ViewBag.CT = ct;
-            return View(phieu);
+            var vm = new ReturnFormVM
+            {
+                PhieuMuonId = phieu.PhieuMuonId,
+                DocGiaId = phieu.DocGiaId,
+                DocGiaName = phieu.DocGia?.HoTen, // đổi theo field thật của bạn
+                HanTra = phieu.HanTra,
+                Items = ct.Select(x => new ReturnItemVM
+                {
+                    SachId = x.SachId,
+                    DauSachTitle = x.Sach?.DauSach?.TieuDe,
+                    CurrentTinhTrang = x.Sach?.TinhTrang,
+                    TinhTrangLucTra = "Con",
+                    IsReturned = true
+                }).ToList()
+            };
+
+            return View(vm);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ReturnAll(int phieuMuonId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReturnSubmit(ReturnFormVM vm)
         {
-            var phieu = await _db.PhieuMuons.FindAsync(phieuMuonId);
+            // Guard basic
+            if (vm.Items == null || vm.Items.Count == 0)
+            {
+                TempData["err"] = "Không có bản sao để trả.";
+                return RedirectToAction(nameof(ReturnForm), new { id = vm.PhieuMuonId });
+            }
+
+            await using var tx = await _db.Database.BeginTransactionAsync();
+
+            var phieu = await _db.PhieuMuons
+                .FirstOrDefaultAsync(x => x.PhieuMuonId == vm.PhieuMuonId);
+
             if (phieu == null) return NotFound();
+            if (phieu.TrangThai != "DangMuon")
+            {
+                TempData["err"] = "Phiếu không ở trạng thái đang mượn.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            var ctMuon = await _db.CtPhieuMuons.Where(x => x.PhieuMuonId == phieuMuonId).ToListAsync();
-            var sachIds = ctMuon.Select(x => x.SachId).ToList();
-            var saches = await _db.Saches.Where(x => sachIds.Contains(x.SachId)).ToListAsync();
+            var ctMuon = await _db.CtPhieuMuons
+                .Where(x => x.PhieuMuonId == vm.PhieuMuonId)
+                .ToListAsync();
 
-            // tạo Phiếu trả
+            // Chỉ xử lý những item được tick trả (nếu bạn cho phép partial return)
+            var returnIds = vm.Items.Where(i => i.IsReturned).Select(i => i.SachId).Distinct().ToList();
+            if (returnIds.Count == 0)
+            {
+                TempData["err"] = "Chưa chọn bản sao nào để trả.";
+                return RedirectToAction(nameof(ReturnForm), new { id = vm.PhieuMuonId });
+            }
+
+            // Chống “trả lạc phiếu”
+            var validIds = ctMuon.Select(x => x.SachId).ToHashSet();
+            if (returnIds.Any(id => !validIds.Contains(id)))
+            {
+                TempData["err"] = "Có bản sao không thuộc phiếu mượn này.";
+                return RedirectToAction(nameof(ReturnForm), new { id = vm.PhieuMuonId });
+            }
+
+            var saches = await _db.Saches.Where(s => returnIds.Contains(s.SachId)).ToListAsync();
+
+            // 1) tạo Phiếu trả :contentReference[oaicite:2]{index=2}
             var phieuTra = new PhieuTra
             {
-                PhieuMuonId = phieuMuonId,
-                NgayTra = DateTime.Now
+                PhieuMuonId = vm.PhieuMuonId,
+                NgayTra = DateTime.Now,
+                GhiChu = vm.GhiChu
             };
             _db.PhieuTras.Add(phieuTra);
             await _db.SaveChangesAsync();
 
-            // tạo CT_PhieuTra + cập nhật CT_PhieuMuon
-            foreach (var ct in ctMuon)
-            {
-                ct.NgayTraThucTe = DateOnly.FromDateTime(DateTime.Now);
+            // 2) cập nhật chi tiết + tạo CT Phiếu trả :contentReference[oaicite:3]{index=3}
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            var isLate = today > phieu.HanTra;
+            var soNgayTre = isLate ? (today.DayNumber - phieu.HanTra.DayNumber) : 0;
 
-                ct.TinhTrangLucTra = "Con";
+            const decimal PHAT_TRE_MOI_NGAY = 5000m;      // chỉnh theo quy định
+            const decimal PHAT_HONG = 20000m;             // placeholder
+            const decimal PHAT_MAT = 100000m;             // placeholder
+
+            foreach (var item in vm.Items.Where(i => i.IsReturned))
+            {
+                var ct = ctMuon.First(x => x.SachId == item.SachId);
+
+                // block double-return: nếu đã có ngày trả rồi thì skip / báo lỗi
+                if (ct.NgayTraThucTe != null)
+                    continue;
+
+                ct.NgayTraThucTe = today;
+                ct.TinhTrangLucTra = item.TinhTrangLucTra;
 
                 _db.CtPhieuTras.Add(new CtPhieuTra
                 {
                     PhieuTraId = phieuTra.PhieuTraId,
-                    SachId = ct.SachId,
-                    TinhTrangLucTra = "Con"
+                    SachId = item.SachId,
+                    TinhTrangLucTra = item.TinhTrangLucTra
                 });
+
+                // update tình trạng sách theo trả
+                var sach = saches.First(s => s.SachId == item.SachId);
+                sach.TinhTrang = item.TinhTrangLucTra switch
+                {
+                    "Con" => "Con",
+                    "Hong" => "Hong",
+                    "Mat" => "Mat",
+                    _ => "Con"
+                };
+
+                // lập phạt theo từng bản sao (nếu bạn muốn 1 phiếu phạt tổng, mình sẽ gom lại)
+                decimal tienPhat = 0m;
+                string lyDo = "";
+
+                if (isLate)
+                {
+                    tienPhat += soNgayTre * PHAT_TRE_MOI_NGAY;
+                    lyDo += $"Trễ hạn {soNgayTre} ngày; ";
+                }
+
+                if (item.TinhTrangLucTra == "Hong")
+                {
+                    tienPhat += PHAT_HONG;
+                    lyDo += "Hỏng; ";
+                }
+                else if (item.TinhTrangLucTra == "Mat")
+                {
+                    tienPhat += PHAT_MAT;
+                    lyDo += "Mất; ";
+                }
+
+                if (tienPhat > 0)
+                {
+                    _db.Phats.Add(new Phat
+                    {
+                        PhieuMuonId = vm.PhieuMuonId,
+                        SachId = item.SachId,
+                        LyDo = lyDo.Trim(),
+                        SoTien = tienPhat,
+                        DaThanhToan = false,
+                        NgayLap = DateTime.Now
+                    });
+                }
             }
 
-            // trả sách => còn
-            foreach (var s in saches)
-                s.TinhTrang = "Con";
-
-            // update trạng thái phiếu mượn
-            phieu.TrangThai = "DaTra";
+            // 3) update trạng thái phiếu mượn:
+            // nếu tất cả CT đều đã trả => DaTra, ngược lại giữ DangMuon (partial return)
+            var allReturned = ctMuon.All(x => x.NgayTraThucTe != null);
+            phieu.TrangThai = allReturned ? "DaTra" : "DangMuon";
 
             await _db.SaveChangesAsync();
+            await tx.CommitAsync();
 
-            // phạt trễ hạn (nếu có HanTra)
-            var today = DateOnly.FromDateTime(DateTime.Now);
+            TempData["ok"] = "Đã lập phiếu trả.";
+            return RedirectToAction(nameof(Index));
+        }
 
-            if (today > phieu.HanTra)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReturnAll(
+            int phieuMuonId,
+            List<int> sachIds,
+            List<string> tinhTrangLucTra,
+            List<int>? returnIds)
+        {
+            if (sachIds == null || sachIds.Count == 0)
             {
-                int soNgayTre = today.DayNumber - phieu.HanTra.DayNumber;
+                TempData["err"] = "Không có bản sao để trả.";
+                return RedirectToAction(nameof(ReturnForm), new { id = phieuMuonId });
+            }
 
-                decimal tienPhat = soNgayTre * 5000m;
+            if (tinhTrangLucTra == null || tinhTrangLucTra.Count != sachIds.Count)
+            {
+                TempData["err"] = "Dữ liệu tình trạng trả không hợp lệ.";
+                return RedirectToAction(nameof(ReturnForm), new { id = phieuMuonId });
+            }
 
-                foreach (var sid in sachIds)
+            // If nothing checked => treat as return all
+            var returnSet = (returnIds == null || returnIds.Count == 0)
+                ? sachIds.Distinct().ToHashSet()
+                : returnIds.Distinct().ToHashSet();
+
+            await using var tx = await _db.Database.BeginTransactionAsync();
+
+            var phieu = await _db.PhieuMuons.FirstOrDefaultAsync(x => x.PhieuMuonId == phieuMuonId);
+            if (phieu == null) return NotFound();
+
+            if (phieu.TrangThai != "DangMuon")
+            {
+                TempData["err"] = "Chỉ lập phiếu trả cho phiếu đang mượn.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var ctMuon = await _db.CtPhieuMuons
+                .Where(x => x.PhieuMuonId == phieuMuonId)
+                .ToListAsync();
+
+            var validIds = ctMuon.Select(x => x.SachId).ToHashSet();
+            if (returnSet.Any(id => !validIds.Contains(id)))
+            {
+                TempData["err"] = "Có bản sao không thuộc phiếu mượn này.";
+                return RedirectToAction(nameof(ReturnForm), new { id = phieuMuonId });
+            }
+
+            var saches = await _db.Saches.Where(x => returnSet.Contains(x.SachId)).ToListAsync();
+
+            // Create Phiếu trả
+            var phieuTra = new PhieuTra
+            {
+                PhieuMuonId = phieuMuonId,
+                NgayTra = DateTime.Now,
+                GhiChu = null
+            };
+            _db.PhieuTras.Add(phieuTra);
+            await _db.SaveChangesAsync();
+
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            var isLate = today > phieu.HanTra;
+            var soNgayTre = isLate ? (today.DayNumber - phieu.HanTra.DayNumber) : 0;
+
+            const decimal PHAT_TRE_MOI_NGAY = 5000m;
+            const decimal PHAT_HONG = 20000m;   // chỉnh theo rule của bạn
+            const decimal PHAT_MAT = 100000m;   // chỉnh theo rule của bạn
+
+            // Map status by posted order (sachIds[i] -> tinhTrangLucTra[i])
+            var statusMap = new Dictionary<int, string>();
+            for (int i = 0; i < sachIds.Count; i++)
+            {
+                var sid = sachIds[i];
+                var tt = (tinhTrangLucTra[i] ?? "Con").Trim();
+                statusMap[sid] = tt;
+            }
+
+            // Update per returned item
+            foreach (var sid in returnSet)
+            {
+                var ct = ctMuon.First(x => x.SachId == sid);
+
+                // prevent double-return
+                if (ct.NgayTraThucTe != null) continue;
+
+                var ttTra = statusMap.TryGetValue(sid, out var tt) ? tt : "Con";
+                if (ttTra != "Con" && ttTra != "Hong" && ttTra != "Mat")
+                    ttTra = "Con";
+
+                ct.NgayTraThucTe = today;
+                ct.TinhTrangLucTra = ttTra;
+
+                _db.CtPhieuTras.Add(new CtPhieuTra
+                {
+                    PhieuTraId = phieuTra.PhieuTraId,
+                    SachId = sid,
+                    TinhTrangLucTra = ttTra
+                });
+
+                var sach = saches.First(s => s.SachId == sid);
+                sach.TinhTrang = ttTra; // Con/Hong/Mat
+
+                // Fine per book (late + condition)
+                decimal tienPhat = 0m;
+                string lyDo = "";
+
+                if (isLate)
+                {
+                    tienPhat += soNgayTre * PHAT_TRE_MOI_NGAY;
+                    lyDo += $"Trễ hạn {soNgayTre} ngày; ";
+                }
+
+                if (ttTra == "Hong")
+                {
+                    tienPhat += PHAT_HONG;
+                    lyDo += "Hỏng; ";
+                }
+                else if (ttTra == "Mat")
+                {
+                    tienPhat += PHAT_MAT;
+                    lyDo += "Mất; ";
+                }
+
+                if (tienPhat > 0)
                 {
                     _db.Phats.Add(new Phat
                     {
                         PhieuMuonId = phieuMuonId,
                         SachId = sid,
-                        LyDo = $"Trễ hạn {soNgayTre} ngày",
+                        LyDo = lyDo.Trim(),
                         SoTien = tienPhat,
                         DaThanhToan = false,
                         NgayLap = DateTime.Now,
                         GhiChu = null
                     });
                 }
-            await _db.SaveChangesAsync();
             }
+
+            // If all books in loan are returned => DaTra else keep DangMuon
+            var allReturned = ctMuon.All(x => x.NgayTraThucTe != null);
+            phieu.TrangThai = allReturned ? "DaTra" : "DangMuon";
+
+            await _db.SaveChangesAsync();
+            await tx.CommitAsync();
 
             TempData["ok"] = "Đã lập phiếu trả.";
             return RedirectToAction(nameof(Index));
         }
+
     }
 }

@@ -6,17 +6,14 @@
 }
 
 <style>
-    /* =========================
-           Admin CRUD Page (DauSach)
-           ========================= */
     .admin-page {
         padding: 10px 0 30px;
     }
 
     .admin-toolbar {
         display: flex;
-        align-items: flex-end;
         justify-content: space-between;
+        align-items: flex-end;
         gap: 12px;
         margin: 8px 0 14px;
         flex-wrap: wrap;
@@ -25,27 +22,13 @@
     .admin-title {
         margin: 0;
         font-size: 26px;
-        font-weight: 700;
-        letter-spacing: .2px;
+        font-weight: 800;
     }
 
     .admin-subtitle {
         margin-top: 6px;
         color: rgba(0,0,0,.55);
         font-size: 13px;
-    }
-
-    .admin-btn {
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-weight: 600;
-    }
-
-    .admin-btn__icon {
-        display: inline-block;
-        margin-right: 6px;
-        font-weight: 900;
-        transform: translateY(-1px);
     }
 
     .admin-card {
@@ -56,42 +39,25 @@
         overflow: hidden;
     }
 
-    .admin-card__body {
-        padding: 0;
+    .admin-table thead th {
+        background: rgba(0,0,0,.03);
+        border-bottom: 1px solid rgba(0,0,0,.08) !important;
+        font-weight: 800;
+        font-size: 12px;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+        padding: 14px 12px !important;
+        white-space: nowrap;
     }
 
-    .admin-table {
-        margin: 0;
-    }
-
-        .admin-table thead th {
-            background: rgba(0,0,0,.03);
-            border-bottom: 1px solid rgba(0,0,0,.08) !important;
-            font-weight: 700;
-            font-size: 12px;
-            letter-spacing: .4px;
-            text-transform: uppercase;
-            padding: 14px 12px !important;
-            white-space: nowrap;
-        }
-
-        .admin-table tbody td {
-            padding: 14px 12px !important;
-            vertical-align: middle !important;
-        }
-
-    .admin-title-cell__name {
-        font-weight: 700;
-        line-height: 1.25;
+    .admin-table tbody td {
+        padding: 14px 12px !important;
+        vertical-align: middle !important;
     }
 
     .admin-mono {
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         font-size: 12.5px;
-    }
-
-    .admin-muted {
-        color: rgba(0,0,0,.45);
     }
 
     .admin-pill {
@@ -100,27 +66,22 @@
         border-radius: 999px;
         background: rgba(0,0,0,.06);
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 700;
         line-height: 1;
     }
 
-    .admin-pill--soft {
-        background: rgba(255,195,0,.18); /* “corporate gold” */
+    .admin-pill--ok {
+        background: rgba(25,135,84,.12);
     }
 
-    .admin-pill--isbn {
-        background: rgba(0,0,0,.08);
+    .admin-pill--danger {
+        background: rgba(220,53,69,.12);
     }
 
     .admin-action-btn {
         border-radius: 10px;
         padding: 7px 10px;
-        font-weight: 700;
-    }
-
-    .admin-inline-form {
-        display: inline-block;
-        margin: 0 0 0 6px;
+        font-weight: 800;
     }
 
     .admin-empty {
@@ -129,123 +90,83 @@
         color: rgba(0,0,0,.55);
         background: #fff;
     }
-    /* ===== Returns / PhieuTra extras ===== */
-    .admin-alert {
-        border-radius: 12px;
-        margin-bottom: 12px;
-    }
 
-    .admin-status--unknown {
-        background: rgba(0,0,0,.08);
-        color: rgba(0,0,0,.65);
+    .is-overdue td {
+        background: rgba(220,53,69,.05);
     }
-
-    /* row hinting */
-    .admin-table tr.is-overdue td {
-        background: rgba(220,53,69,.06);
-    }
-
-    .admin-table tr.is-ontime td {
-        background: transparent;
-    }
-
 </style>
 <div class="admin-page">
-
-    <!-- Toolbar -->
     <div class="admin-toolbar">
-        <div class="admin-toolbar__left">
+        <div>
             <h2 class="admin-title">↩️ Trả sách</h2>
-            <div class="admin-subtitle">Danh sách phiếu đang mượn — chọn phiếu để lập phiếu trả.</div>
+            <div class="admin-subtitle">Danh sách phiếu đang mượn — chọn phiếu để lập phiếu trả tại quầy.</div>
         </div>
     </div>
 
     @if (TempData["ok"] != null)
     {
-        <div class="alert alert-success admin-alert">
-            @TempData["ok"]
-        </div>
+        <div class="alert alert-success">@TempData["ok"]</div>
+    }
+    @if (TempData["err"] != null)
+    {
+        <div class="alert alert-danger">@TempData["err"]</div>
     }
 
     <div class="admin-card">
-        <div class="admin-card__body">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped admin-table">
-                    <thead>
-                        <tr>
-                            <th style="width:90px;">Mã</th>
-                            <th>Độc giả</th>
-                            <th style="width:160px;">Ngày mượn</th>
-                            <th style="width:160px;">Hạn trả</th>
-                            <th style="width:120px;" class="text-center">Trạng thái</th>
-                            <th style="width:170px;" class="text-right">Thao tác</th>
-                        </tr>
-                    </thead>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped admin-table">
+                <thead>
+                    <tr>
+                        <th style="width:90px;">Mã</th>
+                        <th>Độc giả</th>
+                        <th style="width:180px;">Ngày mượn</th>
+                        <th style="width:140px;">Hạn trả</th>
+                        <th style="width:120px;" class="text-center">Trạng thái</th>
+                        <th style="width:170px;" class="text-right">Thao tác</th>
+                    </tr>
+                </thead>
 
-                    <tbody>
-                        @if (Model == null || !Model.Any())
+                <tbody>
+                    @if (Model == null || !Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="admin-empty">Hiện không có phiếu nào đang mượn.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        var today = DateOnly.FromDateTime(DateTime.Now);
+
+                        foreach (var p in Model)
                         {
-                            <tr>
-                                <td colspan="6" class="admin-empty">
-                                    Hiện không có phiếu nào đang mượn.
+                            var overdue = (p.HanTra < today);
+                            <tr class="@(overdue ? "is-overdue" : "")">
+                                <td class="admin-mono">@p.PhieuMuonId</td>
+                                <td>@(p.DocGia?.HoTen ?? $"#{p.DocGiaId}")</td>
+                                <td class="admin-mono">@p.NgayMuon.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="admin-mono">@p.HanTra</td>
+                                <td class="text-center">
+                                    @if (overdue)
+                                    {
+                                        <span class="admin-pill admin-pill--danger">Quá hạn</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="admin-pill admin-pill--ok">Đang mượn</span>
+                                    }
+                                </td>
+                                <td class="text-right">
+                                    <a asp-action="ReturnForm" asp-route-id="@p.PhieuMuonId"
+                                       class="btn btn-sm btn-primary admin-action-btn">
+                                        Lập phiếu trả
+                                    </a>
                                 </td>
                             </tr>
                         }
-                        else
-                        {
-                            var today = DateTime.Today;
-
-                            foreach (var p in Model)
-                            {
-                                // Null-safe + overdue detect
-                                var due = p.HanTra;
-                                var isOverdue = (due != DateOnly.FromDayNumber(DateTime.Now.Day) && due.Day < today.Day);
-
-                                <tr class="@(isOverdue ? "is-overdue" : "is-ontime")">
-                                    <td class="admin-mono">#@p.PhieuMuonId</td>
-
-                                    <td>
-                                        <div class="admin-title-cell__name">
-                                            @(p.DocGia?.HoTen ?? "—")
-                                        </div>
-                                    </td>
-
-                                    <td class="admin-mono">
-                                        @(p.NgayMuon == default(DateTime) ? "—" : p.NgayMuon.ToString("dd/MM/yyyy"))
-                                    </td>
-
-                                    <td class="admin-mono">
-                                        @(p.HanTra == DateOnly.FromDayNumber(DateTime.Now.Day) ? "—" : p.HanTra.ToString("dd/MM/yyyy"))
-                                    </td>
-
-                                    <td class="text-center">
-                                        @if (due == DateOnly.FromDayNumber(DateTime.Now.Day))
-                                        {
-                                            <span class="admin-status admin-status--unknown">CHƯA RÕ</span>
-                                        }
-                                        else if (isOverdue)
-                                        {
-                                            <span class="admin-status admin-status--unpaid">QUÁ HẠN</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="admin-status admin-status--paid">CÒN HẠN</span>
-                                        }
-                                    </td>
-
-                                    <td class="text-right">
-                                        <a asp-action="ReturnForm" asp-route-id="@p.PhieuMuonId"
-                                           class="btn btn-sm btn-primary admin-action-btn">
-                                            Lập phiếu trả
-                                        </a>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
-
 </div>
+

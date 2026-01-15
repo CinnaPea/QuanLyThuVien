@@ -32,21 +32,35 @@ namespace WebApplication1.Areas.Admin.Controllers
 
             return View();
         }
-
         [HttpPost]
-        public async Task<IActionResult> Create(
-            int DocGiaId,
-            List<int> sachIds,
-            int soNgayMuon,
-            string? ghiChu)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(int docGiaId, List<int> sachIds)
         {
+            if (sachIds == null || sachIds.Count == 0)
+            {
+                TempData["err"] = "Chọn ít nhất 1 bản sao.";
+                return RedirectToAction(nameof(Create));
+            }
+
+            sachIds = sachIds.Distinct().ToList();
+
+            // Optional: check sách còn "Con" tại thời điểm request (không lock)
+            var saches = await _db.Saches.Where(s => sachIds.Contains(s.SachId)).ToListAsync();
+            if (saches.Count != sachIds.Count || saches.Any(s => s.TinhTrang != "Con")) // chuẩn hóa 1 trạng thái
+            {
+                TempData["err"] = "Có bản sao không khả dụng. Vui lòng chọn lại.";
+                return RedirectToAction(nameof(Create));
+            }
+
+            await using var tx = await _db.Database.BeginTransactionAsync();
+
             var phieu = new PhieuMuon
             {
-                DocGiaId = DocGiaId,
-                NgayMuon = DateTime.Now,
-                HanTra = DateOnly.FromDateTime(DateTime.Now.AddDays(soNgayMuon)),
-                TrangThai = "DangMuon",
-                GhiChu = ghiChu
+                DocGiaId = docGiaId,
+                NgayMuon = DateTime.Now, 
+                TrangThai = "ChoDuyet",
+                HanTra = DateOnly.FromDateTime(DateTime.Today),                 
+                GhiChu = null
             };
 
             _db.PhieuMuons.Add(phieu);
@@ -57,17 +71,20 @@ namespace WebApplication1.Areas.Admin.Controllers
                 _db.CtPhieuMuons.Add(new CtPhieuMuon
                 {
                     PhieuMuonId = phieu.PhieuMuonId,
-                    SachId = sid
+                    SachId = sid,
+                    // chưa giao sách => chưa cần set tình trạng lúc mượn
+                    TinhTrangLucMuon = null
                 });
-
-                var sach = await _db.Saches.FindAsync(sid);
-                sach.TinhTrang = "DangMuon";
             }
 
             await _db.SaveChangesAsync();
+            await tx.CommitAsync();
 
-            return RedirectToAction("Index");
+            TempData["ok"] = "Đã gửi yêu cầu mượn. Chờ admin duyệt.";
+            return RedirectToAction(nameof(Details), new { id = phieu.PhieuMuonId });
         }
+
+
         public async Task<IActionResult> ChoDuyet()
         {
             var list = await _db.PhieuMuons
@@ -93,44 +110,69 @@ namespace WebApplication1.Areas.Admin.Controllers
             ViewBag.CT = ct;
             return View(phieu);
         }
-
         [HttpPost]
         public async Task<IActionResult> Approve(int id, int soNgayMuon = 7)
         {
-            var phieu = await _db.PhieuMuons.FindAsync(id);
+            await using var tx = await _db.Database.BeginTransactionAsync();
+
+            var phieu = await _db.PhieuMuons
+                .Include(p => p.CtPhieuMuons)
+                .FirstOrDefaultAsync(p => p.PhieuMuonId == id);
+
             if (phieu == null) return NotFound();
-
-            var ct = await _db.CtPhieuMuons.Where(x => x.PhieuMuonId == id).ToListAsync();
-            var sachIds = ct.Select(x => x.SachId).ToList();
-            var saches = await _db.Saches.Where(x => sachIds.Contains(x.SachId)).ToListAsync();
-
-            if (saches.Any(s => !(s.TinhTrang == "Con" || s.TinhTrang == "Available")))
+            if (phieu.TrangThai != "ChoDuyet")
             {
-                TempData["err"] = "Có sách không còn khả dụng nên không thể duyệt.";
+                TempData["err"] = "Phiếu không ở trạng thái chờ duyệt.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
+            var sachIds = phieu.CtPhieuMuons.Select(x => x.SachId).Distinct().ToList();
+            var saches = await _db.Saches.Where(s => sachIds.Contains(s.SachId)).ToListAsync();
+
+            if (saches.Any(s => s.TinhTrang != "Con"))
+            {
+                TempData["err"] = "Có bản sao không còn khả dụng. Không thể duyệt.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            // set hạn trả + trạng thái phiếu
             phieu.TrangThai = "DangMuon";
             phieu.HanTra = DateOnly.FromDateTime(DateTime.Now.AddDays(soNgayMuon));
 
-            foreach (var s in saches) s.TinhTrang = "DangMuon";
+            // giao sách: đổi trạng thái sách, và snapshot tình trạng lúc mượn
+            foreach (var ct in phieu.CtPhieuMuons)
+            {
+                var sach = saches.First(s => s.SachId == ct.SachId);
+                ct.TinhTrangLucMuon = sach.TinhTrang; // trước khi đổi (thường là "Con") :contentReference[oaicite:5]{index=5}
+                sach.TinhTrang = "DangMuon";           // :contentReference[oaicite:6]{index=6}
+            }
 
             await _db.SaveChangesAsync();
-            TempData["ok"] = "Đã duyệt & giao sách.";
+            await tx.CommitAsync();
+
+            TempData["ok"] = "Đã duyệt và giao sách.";
             return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Reject(int id, string? ghiChu)
+        public async Task<IActionResult> Reject(int id, string? ghiChu = null)
         {
             var phieu = await _db.PhieuMuons.FindAsync(id);
             if (phieu == null) return NotFound();
 
+            if (phieu.TrangThai != "ChoDuyet")
+            {
+                TempData["err"] = "Phiếu không ở trạng thái chờ duyệt.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
             phieu.TrangThai = "TuChoi";
             phieu.GhiChu = ghiChu;
-
             await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(ChoDuyet));
+
+            TempData["ok"] = "Đã từ chối yêu cầu.";
+            return RedirectToAction(nameof(Details), new { id });
         }
+
     }
 }
