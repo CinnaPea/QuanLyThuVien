@@ -1,0 +1,66 @@
+﻿@model List<WebApplication1.Models.PhieuMuon>
+@{
+    ViewData["Title"] = "Phiếu mượn của tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/library-home.css" />
+
+<div class="container">
+    <div class="page-head">
+        <div>
+            <h2>🧾 Phiếu mượn của tôi</h2>
+            <div class="muted">Danh sách các phiếu mượn bạn đã lập</div>
+        </div>
+        <a class="btn" asp-controller="Book" asp-action="Index">📚 Xem sách</a>
+    </div>
+
+    <div class="card">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="empty">
+                <b>Bạn chưa có phiếu mượn nào.</b>
+                <div class="muted">Hãy vào trang Sách để thêm vào giỏ và lập phiếu mượn.</div>
+            </div>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mã phiếu</th>
+                        <th>Ngày mượn</th>
+                        <th>Hạn trả</th>
+                        <th>Trạng thái</th>
+                        <th>Ghi chú</th>
+                        <th style="width:120px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        var status = (p.TrangThai ?? "").Trim().ToLower();
+                        var badgeClass =
+                        status.Contains("duyet") ? "badge ok" :
+                        status.Contains("dang") ? "badge warn" :
+                        status.Contains("tra") ? "badge gray" :
+                        "badge";
+
+                        <tr>
+                            <td><b>#@p.PhieuMuonId</b></td>
+                            <td>@p.NgayMuon.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@p.HanTra.ToString("dd/MM/yyyy")</td>
+                            <td><span class="@badgeClass">@p.TrangThai</span></td>
+                            <td class="muted">@(string.IsNullOrWhiteSpace(p.GhiChu) ? "-" : p.GhiChu)</td>
+                            <td class="text-right">
+                                <a class="btn" asp-controller="UserBorrow" asp-action="Details" asp-route-id="@p.PhieuMuonId">
+                                    Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

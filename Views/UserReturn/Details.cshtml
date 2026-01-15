@@ -1,0 +1,121 @@
+﻿@model WebApplication1.Models.PhieuTra
+@{
+    ViewData["Title"] = "Chi tiết phiếu trả";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="mb-4">
+
+        <!-- NÚT QUAY LẠI -->
+        <a asp-action="Index" class="btn btn-back mb-3">
+            ⬅ Quay lại
+        </a>
+
+        <h3 class="fw-bold text-white mb-1">
+            📄 Phiếu trả #@Model.PhieuTraId
+        </h3>
+
+        <p class="text-muted mb-0">
+            Chi tiết sách đã trả của bạn
+        </p>
+    </div>
+
+    <!-- THÔNG TIN PHIẾU TRẢ -->
+    <div class="card bg-dark text-white shadow-sm mb-4 rounded-4">
+        <div class="card-body">
+
+            <div class="borrow-info">
+
+                <!-- Ngày mượn -->
+                <div>
+                    <div class="text-muted small mb-1">Ngày mượn</div>
+                    <div class="fw-semibold">
+                        @Model.PhieuMuon?.NgayMuon.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+
+                <!-- Ngày trả -->
+                <div>
+                    <div class="text-muted small mb-1">Ngày trả</div>
+                    <div class="fw-semibold">
+                        @Model.NgayTra.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+
+                <!-- Trạng thái -->
+                <div>
+                    <div class="text-muted small mb-2">Trạng thái</div>
+                    <span class="badge rounded-pill bg-success px-3 py-2">
+                        Đã trả
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- DANH SÁCH SÁCH ĐÃ TRẢ -->
+    <div class="card bg-dark text-white shadow-sm rounded-4">
+        <div class="card-header border-0 pb-0">
+            <h5 class="fw-bold mb-0">📚 Danh sách sách đã trả</h5>
+        </div>
+
+        <div class="card-body pt-3">
+
+            @if (!Model.CtPhieuTras.Any())
+            {
+                <div class="alert alert-info bg-opacity-10 text-white border-0">
+                    Phiếu trả chưa có sách.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead class="text-muted">
+                            <tr>
+                                <th style="width:60px">#</th>
+                                <th>Đầu sách</th>
+                                <th style="width:160px">Mã sách</th>
+                            </tr>
+                        </thead>
+
+
+                        <tbody>
+                            @{
+                                int i = 1;
+                            }
+
+                            @foreach (var ct in Model.CtPhieuTras)
+                            {
+                                <tr>
+                                    <td>@i</td>
+
+                                    <td>
+                                        <div class="fw-semibold">
+                                            @ct.Sach?.DauSach?.TieuDe
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="text-info">
+                                            @ct.Sach?.SachId
+                                        </span>
+                                    </td>
+
+                                </tr>
+
+                                i++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

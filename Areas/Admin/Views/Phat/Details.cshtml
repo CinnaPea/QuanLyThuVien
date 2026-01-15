@@ -1,37 +1,81 @@
 ﻿@model WebApplication1.Models.Phat
 @{
     var pays = ViewBag.Payments as List<WebApplication1.Models.ThanhToanPhat> ?? new();
+    decimal totalPaid = ViewBag.TotalPaid ?? 0;
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-<h2>Phạt #@Model.PhatId</h2>
+
+<h2>💸 Phiếu phạt #@Model.PhatId</h2>
 
 @if (TempData["err"] != null)
 {
-     <div style="color:red">@TempData["err"]</div>
+    <div class="alert alert-danger">@TempData["err"]</div>
+}
+@if (TempData["ok"] != null)
+{
+    <div class="alert alert-success">@TempData["ok"]</div>
 }
 
-<p>Phiếu mượn: @Model.PhieuMuonId</p>
-<p>Sách: @Model.SachId</p>
-<p>Lý do: @Model.LyDo</p>
-<p>Số tiền: @Model.SoTien</p>
-<p>Đã thanh toán: @Model.DaThanhToan</p>
+<p><strong>Phiếu mượn:</strong> @Model.PhieuMuonId</p>
+<p><strong>Sách:</strong> @Model.SachId</p>
+<p><strong>Lý do:</strong> @Model.LyDo</p>
+<p><strong>Số tiền phạt:</strong> @Model.SoTien.ToString("N0") đ</p>
 
-<h3>Thanh toán</h3>
-<form method="post" asp-action="Pay">
-    <input type="hidden" name="phatId" value="@Model.PhatId" />
-    <label>Số tiền</label>
-    <input name="soTien" />
-    <button type="submit">Ghi nhận thanh toán</button>
-</form>
+<p>
+    <strong>Đã thanh toán:</strong>
+    @totalPaid.ToString("N0") đ
+</p>
 
-<h3>Lịch sử thanh toán</h3>
-<table border="1" cellpadding="6">
-    <tr><th>Mã</th><th>Số tiền</th><th>Ngày</th><th>Ghi chú</th></tr>
+<p>
+    <strong>Trạng thái:</strong>
+    @if (Model.DaThanhToan)
+    {
+        <span style="color:green;font-weight:bold">ĐÃ THANH TOÁN</span>
+    }
+    else
+    {
+        <span style="color:red;font-weight:bold">CHƯA THANH TOÁN</span>
+    }
+</p>
+
+<hr />
+
+@if (!Model.DaThanhToan)
+{
+    <h3>➕ Ghi nhận thanh toán</h3>
+
+    <form method="post" asp-action="Pay">
+        <input type="hidden" name="phatId" value="@Model.PhatId" />
+
+        <label>Số tiền:</label>
+        <input name="soTien" type="number" min="1"
+               class="form-control money-input" required />
+
+
+        <br />
+        <button type="submit" class="btn btn-primary">
+            Ghi nhận
+        </button>
+    </form>
+}
+
+<hr />
+
+<h3>📜 Lịch sử thanh toán</h3>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Mã</th>
+        <th>Số tiền</th>
+        <th>Ngày</th>
+        <th>Ghi chú</th>
+    </tr>
     @foreach (var x in pays)
     {
         <tr>
             <td>@x.ThanhToanPhatId</td>
-            <td>@x.SoTien</td>
-            <td>@x.NgayThanhToan</td>
+            <td>@x.SoTien.ToString("N0") đ</td>
+            <td>@x.NgayThanhToan.ToString("dd/MM/yyyy HH:mm")</td>
             <td>@x.GhiChu</td>
         </tr>
     }

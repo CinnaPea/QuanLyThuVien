@@ -1,0 +1,60 @@
+﻿@model List<WebApplication1.Models.PhieuTra>
+@{
+    ViewData["Title"] = "Phiếu trả của tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/library-home.css" />
+
+<div class="container">
+    <div class="page-head">
+        <div>
+            <h2>📦 Phiếu trả của tôi</h2>
+            <div class="muted">Danh sách các phiếu trả đã được lập khi bạn trả sách</div>
+        </div>
+        <a class="btn" asp-controller="UserBorrow" asp-action="Index">🧾 Phiếu mượn</a>
+    </div>
+
+    <div class="card">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="empty">
+                <b>Chưa có phiếu trả nào.</b>
+                <div class="muted">Phiếu trả sẽ được tạo khi bạn trả sách thực tế tại thư viện.</div>
+            </div>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mã phiếu trả</th>
+                        <th>Mã phiếu mượn</th>
+                        <th>Ngày trả</th>
+                        <th>Ghi chú</th>
+                        <th style="width:120px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td><b>#@p.PhieuTraId</b></td>
+                            <td>
+                                <span class="muted">PM:</span>
+                                <b>#@p.PhieuMuonId</b>
+                            </td>
+                            <td>@p.NgayTra.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="muted">@(string.IsNullOrWhiteSpace(p.GhiChu) ? "-" : p.GhiChu)</td>
+                            <td class="text-right">
+                                <a class="btn" asp-controller="UserReturn" asp-action="Details" asp-route-id="@p.PhieuTraId">
+                                    Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

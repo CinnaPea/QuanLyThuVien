@@ -8,7 +8,7 @@ using WebApplication1.VMs;
 namespace WebApplication1.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+ 
     public class DauSachController : Controller
     {
         private readonly QuanLyThuVienContext _db;

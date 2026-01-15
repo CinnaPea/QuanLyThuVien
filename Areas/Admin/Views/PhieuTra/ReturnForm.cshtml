@@ -4,183 +4,60 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 
     var ct = ViewBag.CT as List<WebApplication1.Models.CtPhieuMuon> ?? new();
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<div class="admin-page">
-    <div class="admin-toolbar">
-        <div>
-            <h2 class="admin-title">🧾 Lập phiếu trả</h2>
-            <div class="admin-subtitle">Phiếu mượn #@Model.PhieuMuonId — trả tại quầy mới được lập.</div>
-        </div>
-        <div>
-            <a asp-action="Index" class="btn btn-light admin-action-btn">← Quay lại</a>
-        </div>
-    </div>
+<h2>Lập phiếu trả cho phiếu mượn #@Model.PhieuMuonId</h2>
 
-    @if (TempData["err"] != null)
-    {
-        <div class="alert alert-danger">@TempData["err"]</div>
-    }
+<p>Độc giả: <strong>@Model.DocGia?.HoTen</strong></p>
+<p>Hạn trả: <strong>@Model.HanTra</strong></p>
 
-    <div class="admin-card">
-        <div class="admin-card__body">
-            <div class="admin-meta">
-                <div><b>Độc giả:</b> @(Model.DocGia?.HoTen ?? $"#{Model.DocGiaId}")</div>
-                <div><b>Hạn trả:</b> <span class="admin-mono">@Model.HanTra</span></div>
-            </div>
+<form method="post" asp-action="ReturnSelected">
 
-            <form method="post" asp-action="ReturnAll">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="phieuMuonId" value="@Model.PhieuMuonId" />
+    <input type="hidden" name="phieuMuonId" value="@Model.PhieuMuonId" />
 
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped admin-table">
-                        <thead>
-                            <tr>
-                                <th style="width:70px;" class="text-center">Trả</th>
-                                <th style="width:110px;">Mã sách</th>
-                                <th>Đầu sách</th>
-                                <th style="width:170px;">Tình trạng khi trả</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (!ct.Any())
-                            {
-                                <tr>
-                                    <td colspan="4" class="admin-empty">Không có bản sao trong phiếu mượn.</td>
-                                </tr>
-                            }
-                            else
-                            {
-                                for (int i = 0; i < ct.Count; i++)
-                                {
-                                    var row = ct[i];
-                                    <tr>
-                                        <td class="text-center">
-                                            <!-- Cho phép trả từng phần -->
-                                            <input type="checkbox" name="returnIds" value="@row.SachId" checked />
-                                        </td>
+    <table border="1" cellpadding="6" width="100%">
+        <tr>
+            <th>Chọn</th>
+            <th>Mã sách</th>
+            <th>Đầu sách</th>
+            <th>Tình trạng khi trả</th>
+        </tr>
 
-                                        <td class="admin-mono">
-                                            @row.SachId
-                                            <!-- luôn gửi danh sách tất cả sách để map dropdown theo id -->
-                                            <input type="hidden" name="sachIds" value="@row.SachId" />
-                                        </td>
+        @foreach (var x in ct.Where(c => c.NgayTraThucTe == null))
+        {
+            <tr>
+                <td align="center">
+                    <input type="checkbox"
+                           name="sachIds"
+                           value="@x.SachId"
+                           class="chk-sach"
+                           data-id="@x.SachId" />
+                </td>
 
-                                        <td>
-                                            <div class="admin-title-cell__name">@row.Sach?.DauSach?.TieuDe</div>
-                                        </td>
+                <td>@x.SachId</td>
 
-                                        <td>
-                                            <select name="tinhTrangLucTra" class="form-control">
-                                                <option value="Con" selected>Con</option>
-                                                <option value="Hong">Hỏng</option>
-                                                <option value="Mat">Mất</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                <td>@x.Sach?.DauSach?.TieuDe</td>
 
-                <div class="admin-form-actions">
-                    <button type="submit" class="btn btn-primary admin-action-btn">
-                        ✅ Xác nhận trả
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+                <td>
+                    <select name="tinhTrang_@x.SachId"
+                            class="tinh-trang"
+                            data-id="@x.SachId">
+                        <option value="Con">Còn</option>
+                        <option value="HuHong">Hư hỏng</option>
+                        <option value="Mat">Mất sách</option>
+                    </select>
+                </td>
+            </tr>
+        }
+    </table>
 
-<style>
-    .admin-page {
-        padding: 10px 0 30px;
-    }
+    <br />
 
-    .admin-toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        gap: 12px;
-        margin: 8px 0 14px;
-        flex-wrap: wrap;
-    }
+    <button type="submit">✔ Trả sách đã chọn</button>
+    <button type="submit" formaction="/Admin/PhieuTra/ReturnAll">
+        ✔ Trả tất cả
+    </button>
+</form>
 
-    .admin-title {
-        margin: 0;
-        font-size: 26px;
-        font-weight: 800;
-    }
 
-    .admin-subtitle {
-        margin-top: 6px;
-        color: rgba(0,0,0,.55);
-        font-size: 13px;
-    }
-
-    .admin-card {
-        background: #fff;
-        border: 1px solid rgba(0,0,0,.08);
-        border-radius: 14px;
-        box-shadow: 0 10px 30px rgba(0,0,0,.06);
-        overflow: hidden;
-    }
-
-    .admin-card__body {
-        padding: 14px 14px 10px;
-    }
-
-    .admin-meta {
-        display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
-    }
-
-    .admin-mono {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        font-size: 12.5px;
-    }
-
-    .admin-table thead th {
-        background: rgba(0,0,0,.03);
-        border-bottom: 1px solid rgba(0,0,0,.08) !important;
-        font-weight: 800;
-        font-size: 12px;
-        letter-spacing: .4px;
-        text-transform: uppercase;
-        padding: 14px 12px !important;
-        white-space: nowrap;
-    }
-
-    .admin-table tbody td {
-        padding: 14px 12px !important;
-        vertical-align: middle !important;
-    }
-
-    .admin-title-cell__name {
-        font-weight: 800;
-    }
-
-    .admin-action-btn {
-        border-radius: 10px;
-        padding: 7px 10px;
-        font-weight: 800;
-    }
-
-    .admin-empty {
-        text-align: center;
-        padding: 22px 12px !important;
-        color: rgba(0,0,0,.55);
-        background: #fff;
-    }
-
-    .admin-form-actions {
-        margin-top: 12px;
-        display: flex;
-        justify-content: flex-end;
-    }
-</style>

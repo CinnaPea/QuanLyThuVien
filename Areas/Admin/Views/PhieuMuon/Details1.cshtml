@@ -1,0 +1,38 @@
+﻿@model WebApplication1.Models.PhieuMuon
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var ct = ViewBag.CT as List<WebApplication1.Models.CtPhieuMuon> ?? new();
+}
+
+<h2>Chi tiết phiếu mượn #@Model.PhieuMuonId</h2>
+
+@if (TempData["err"] != null)
+{
+    <div style="color:red">@TempData["err"]</div>
+}
+@if (TempData["ok"] != null)
+{
+    <div style="color:green">@TempData["ok"]</div>
+}
+
+<p>Độc giả: @Model.DocGia?.HoTen</p>
+<p>Ngày mượn: @Model.NgayMuon</p>
+<p>Hạn trả: @Model.HanTra</p>
+<p>Trạng thái: @Model.TrangThai</p>
+
+<h3>Sách trong phiếu</h3>
+<table border="1" cellpadding="6">
+    <tr><th>Mã sách</th><th>Đầu sách</th><th>Tình trạng lúc mượn</th></tr>
+    @foreach (var x in ct)
+    {
+        <tr>
+            <td>@x.SachId</td>
+            <td>@x.Sach?.DauSach?.TieuDe</td>
+            <td>@x.TinhTrangLucMuon</td>
+        </tr>
+    }
+</table>
+
+

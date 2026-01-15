@@ -12,29 +12,20 @@
     int? theLoaiId = ViewBag.TheLoaiId as int?;
     int? nhaXuatBanId = ViewBag.NhaXuatBanId as int?;
     int? tacGiaId = ViewBag.TacGiaId as int?;
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <link rel="stylesheet" href="~/css/library-home.css" />
 <link rel="stylesheet" href="~/css/library-display.css" />
 
-<header class="header">
-    <div class="header-inner">
-        <a class="brand" asp-controller="Home" asp-action="Index">
-            <div class="logo">LB</div>
-            <div>
-                <b>Library Online</b><br />
-                <small>Danh sách đầu sách</small>
-            </div>
-        </a>
 
-        <nav class="nav">
-            <a class="btn" asp-controller="Home" asp-action="Index">🏠 Trang chủ</a>
-            <a class="btn" asp-controller="Borrow" asp-action="Cart">🧺 Giỏ mượn</a>
-            <a class="btn primary" asp-controller="Account" asp-action="Login">🔐 Đăng nhập</a>
-        </nav>
+@if (TempData["CartMessage"] != null)
+{
+    var type = (TempData["CartMessageType"]?.ToString() ?? "success");
+    <div class="toast @(type)">
+        @TempData["CartMessage"]
     </div>
-</header>
-
+}
 <div class="container">
 
     <form class="topbar" method="get">
@@ -174,7 +165,7 @@
 
                                 @if (ds.AvailableCount > 0)
                                 {
-                                    <form asp-controller="Borrow" asp-action="AddToCart" method="post">
+                                    <form asp-controller="Borrow" asp-action="Add" method="post">
                                         <input type="hidden" name="dauSachId" value="@ds.DauSachId" />
                                         <button class="btn primary" type="submit">🧺 Thêm giỏ</button>
                                     </form>

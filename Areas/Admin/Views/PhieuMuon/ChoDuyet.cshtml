@@ -1,16 +1,12 @@
-﻿@model List<WebApplication1.Models.PhieuMuon>
+﻿@model PhieuMuonChoDuyetVM
 
 @{
     ViewData["Title"] = "Phiếu mượn chờ duyệt";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
+
 <style>
-    /* =========================
-           Admin CRUD Page (DauSach)
-           ========================= */
-    .admin-page {
-        padding: 10px 0 30px;
-    }
+    .admin-page { padding: 10px 0 30px; }
 
     .admin-toolbar {
         display: flex;
@@ -25,7 +21,6 @@
         margin: 0;
         font-size: 26px;
         font-weight: 700;
-        letter-spacing: .2px;
     }
 
     .admin-subtitle {
@@ -34,214 +29,193 @@
         font-size: 13px;
     }
 
-    .admin-btn {
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-weight: 600;
-    }
-
-    .admin-btn__icon {
-        display: inline-block;
-        margin-right: 6px;
-        font-weight: 900;
-        transform: translateY(-1px);
-    }
-
     .admin-card {
         background: #fff;
         border: 1px solid rgba(0,0,0,.08);
         border-radius: 14px;
         box-shadow: 0 10px 30px rgba(0,0,0,.06);
         overflow: hidden;
+        margin-top: 14px;
     }
 
-    .admin-card__body {
-        padding: 0;
-    }
-
-    .admin-table {
-        margin: 0;
-    }
-
-        .admin-table thead th {
-            background: rgba(0,0,0,.03);
-            border-bottom: 1px solid rgba(0,0,0,.08) !important;
-            font-weight: 700;
-            font-size: 12px;
-            letter-spacing: .4px;
-            text-transform: uppercase;
-            padding: 14px 12px !important;
-            white-space: nowrap;
-        }
-
-        .admin-table tbody td {
-            padding: 14px 12px !important;
-            vertical-align: middle !important;
-        }
-
-    .admin-title-cell__name {
+    .admin-table thead th {
+        background: rgba(0,0,0,.03);
         font-weight: 700;
-        line-height: 1.25;
+        font-size: 12px;
+        padding: 14px 12px;
+        text-transform: uppercase;
+    }
+
+    .admin-table tbody td {
+        padding: 14px 12px;
+        vertical-align: middle;
     }
 
     .admin-mono {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         font-size: 12.5px;
     }
 
-    .admin-muted {
-        color: rgba(0,0,0,.45);
+    .admin-empty {
+        text-align: center;
+        padding: 26px;
+        color: rgba(0,0,0,.55);
     }
 
     .admin-pill {
         display: inline-block;
         padding: 6px 10px;
         border-radius: 999px;
-        background: rgba(0,0,0,.06);
         font-size: 12px;
-        font-weight: 600;
-        line-height: 1;
-    }
-
-    .admin-pill--soft {
-        background: rgba(255,195,0,.18); /* “corporate gold” */
-    }
-
-    .admin-pill--isbn {
+        font-weight: 700;
         background: rgba(0,0,0,.08);
     }
+
+    .pill-wait { background: rgba(255,193,7,.25); }
+    .pill-done { background: rgba(40,167,69,.25); }
+    .pill-reject { background: rgba(220,53,69,.25); }
 
     .admin-action-btn {
         border-radius: 10px;
-        padding: 7px 10px;
+        padding: 6px 10px;
         font-weight: 700;
     }
-
-    .admin-inline-form {
-        display: inline-block;
-        margin: 0 0 0 6px;
-    }
-
-    .admin-empty {
-        text-align: center;
-        padding: 28px 12px !important;
-        color: rgba(0,0,0,.55);
-        background: #fff;
-    }
-    .admin-alert {
-        border-radius: 12px;
-        margin-bottom: 12px;
-    }
-
-    .admin-status--unknown {
-        background: rgba(0,0,0,.08);
-        color: rgba(0,0,0,.65);
-        display: inline-block;
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: .4px;
-    }
-
-    .admin-alert {
-        border-radius: 12px;
-        margin-bottom: 12px;
-    }
-
 </style>
+
 <div class="admin-page">
 
-    <!-- Toolbar -->
+    <!-- TIÊU ĐỀ -->
     <div class="admin-toolbar">
-        <div class="admin-toolbar__left">
+        <div>
             <h2 class="admin-title">🕒 Phiếu mượn chờ duyệt</h2>
-            <div class="admin-subtitle">Xem chi tiết để duyệt / từ chối, sau đó giao sách theo quy trình.</div>
+            <div class="admin-subtitle">
+                Duyệt phiếu mượn trước khi giao sách cho độc giả
+            </div>
         </div>
     </div>
 
+    <!-- THÔNG BÁO -->
     @if (TempData["err"] != null)
     {
-        <div class="alert alert-danger admin-alert">
-            @TempData["err"]
-        </div>
+        <div class="alert alert-danger">@TempData["err"]</div>
     }
     @if (TempData["ok"] != null)
     {
-        <div class="alert alert-success admin-alert">
-            @TempData["ok"]
-        </div>
+        <div class="alert alert-success">@TempData["ok"]</div>
     }
 
+    <!-- ===== PHIẾU CHỜ DUYỆT ===== -->
     <div class="admin-card">
-        <div class="admin-card__body">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped admin-table">
-                    <thead>
+        <div class="table-responsive">
+            <table class="table table-hover admin-table">
+                <thead>
+                    <tr>
+                        <th style="width:90px;">Mã</th>
+                        <th>Độc giả</th>
+                        <th style="width:160px;">Ngày mượn</th>
+                        <th style="width:150px;">Trạng thái</th>
+                        <th style="width:130px;" class="text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.ChoDuyet.Any())
+                    {
                         <tr>
-                            <th style="width:90px;">Mã</th>
-                            <th>Độc giả</th>
-                            <th style="width:160px;">Ngày mượn</th>
-                            <th style="width:150px;">Trạng thái</th>
-                            <th style="width:130px;" class="text-right">Thao tác</th>
+                            <td colspan="5" class="admin-empty">
+                                Không có phiếu mượn chờ duyệt
+                            </td>
                         </tr>
-                    </thead>
-
-                    <tbody>
-                        @if (Model == null || !Model.Any())
+                    }
+                    else
+                    {
+                        foreach (var p in Model.ChoDuyet)
                         {
                             <tr>
-                                <td colspan="5" class="admin-empty">
-                                    Không có phiếu mượn nào đang chờ duyệt.
+                                <td class="admin-mono">#@p.PhieuMuonId</td>
+                                <td>@p.DocGia?.HoTen</td>
+                                <td class="admin-mono">
+                                    @p.NgayMuon.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    <span class="admin-pill pill-wait">
+                                        @p.TrangThai
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <a asp-action="Details"
+                                       asp-route-id="@p.PhieuMuonId"
+                                       class="btn btn-sm btn-info admin-action-btn">
+                                        Chi tiết
+                                    </a>
                                 </td>
                             </tr>
                         }
-                        else
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===== LỊCH SỬ PHIẾU MƯỢN ===== -->
+    <hr style="margin:32px 0;" />
+
+    <h2 class="admin-title">📚 Lịch sử phiếu mượn</h2>
+    <div class="admin-subtitle">
+        Các phiếu đã trả hoặc bị từ chối gần đây
+    </div>
+
+    <div class="admin-card">
+        <div class="table-responsive">
+            <table class="table table-hover admin-table">
+                <thead>
+                    <tr>
+                        <th style="width:90px;">Mã</th>
+                        <th>Độc giả</th>
+                        <th style="width:160px;">Ngày mượn</th>
+                        <th style="width:150px;">Trạng thái</th>
+                        <th style="width:130px;" class="text-right">Xem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.LichSu.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="admin-empty">
+                                Chưa có lịch sử phiếu mượn
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var p in Model.LichSu)
                         {
-                            foreach (var p in Model)
-                            {
-                                var st = (p.TrangThai ?? "").Trim();
+                            var pill = p.TrangThai == "DaTra"
+                                ? "pill-done"
+                                : "pill-reject";
 
-                                <tr>
-                                    <td class="admin-mono">#@p.PhieuMuonId</td>
-
-                                    <td>
-                                        <div class="admin-title-cell__name">
-                                            @(p.DocGia?.HoTen ?? "—")
-                                        </div>
-                                        @if (!string.IsNullOrWhiteSpace(p.GhiChu))
-                                        {
-                                            <div class="admin-muted" style="margin-top:4px;">
-                                                Ghi chú: @p.GhiChu
-                                            </div>
-                                        }
-                            </td>
-
-                            <td class="admin-mono">
-                                @(p.NgayMuon == default(DateTime) ? "—" : p.NgayMuon.ToString("dd/MM/yyyy"))
-                            </td>
-
-                            <td>
-                                <span class="admin-status admin-status--unknown">
-                                    @(
-                                                                        string.IsNullOrWhiteSpace(st) ? "—" : st
-                                                                        )
-                                </span>
-                            </td>
-
-                                    <td class="text-right">
-                                        <a asp-action="Details" asp-route-id="@p.PhieuMuonId"
-                                           class="btn btn-sm btn-info admin-action-btn">
-                                            Chi tiết
-                                        </a>
-                                    </td>
-                                </tr>
-                                                }
+                            <tr>
+                                <td class="admin-mono">#@p.PhieuMuonId</td>
+                                <td>@p.DocGia?.HoTen</td>
+                                <td class="admin-mono">
+                                    @p.NgayMuon.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    <span class="admin-pill @pill">
+                                        @p.TrangThai
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <a asp-action="Details1"
+                                       asp-route-id="@p.PhieuMuonId"
+                                       class="btn btn-sm btn-secondary admin-action-btn">
+                                        Xem
+                                    </a>
+                                </td>
+                            </tr>
                         }
-                    </tbody>
-
-                </table>
-            </div>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 
