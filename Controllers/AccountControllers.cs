@@ -68,7 +68,7 @@ namespace LibraryManagement.Controllers
                 return Redirect(returnUrl);
 
             if (roleName.Equals("Admin", StringComparison.OrdinalIgnoreCase))
-                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+                return RedirectToAction("Index", "Admin", new { area = "Admin" });
 
             return RedirectToAction("Index", "Home");
         }

@@ -62,7 +62,12 @@
 
             <div class="header-actions text-white">
                 <span class="me-3">Admin</span>
-                <a href="/Auth/Logout" class="btn btn-sm btn-outline-light">Logout</a>
+                <form asp-area="Admin" asp-controller="Admin" asp-action="Logout"
+                      method="post" style="display:inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
+                </form>
+
             </div>
         </header>
 
