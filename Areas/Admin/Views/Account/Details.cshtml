@@ -1,0 +1,84 @@
+﻿@model WebApplication1.Models.TaiKhoan
+
+@{
+    ViewData["Title"] = "Chi tiết tài khoản";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/css/CRUD.css" />
+<link rel="stylesheet" href="~/css/admin-detail.css" />
+
+<div class="container-fluid admin-page">
+
+    <div class="admin-toolbar">
+        <div>
+            <h3 class="admin-title mb-0">Chi tiết tài khoản</h3>
+            <div class="admin-subtitle">Thông tin tài khoản & hồ sơ độc giả</div>
+        </div>
+
+        <div class="admin-actions">
+            <a class="btn btn-outline-secondary admin-action-btn"
+               asp-area="Admin" asp-controller="Account" asp-action="Index">
+                ← Back
+            </a>
+
+            <a class="btn btn-outline-warning admin-action-btn"
+               asp-area="Admin" asp-controller="Account" asp-action="Edit" asp-route-id="@Model.TaiKhoanId">
+                ✎ Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-card admin-details-card">
+        <div class="admin-card__body p-0">
+            <div class="admin-details-grid">
+                <div class="admin-details-item">
+                    <div class="admin-details-label">Tên đăng nhập</div>
+                    <div class="admin-details-value">@Model.TenDangNhap</div>
+                </div>
+
+                <div class="admin-details-item">
+                    <div class="admin-details-label">Vai trò</div>
+                    <div class="admin-details-value">
+                        <span class="admin-chip admin-chip--role">@Model.VaiTro?.TenVaiTro</span>
+                    </div>
+                </div>
+
+                <div class="admin-details-item">
+                    <div class="admin-details-label">Trạng thái</div>
+                    <div class="admin-details-value">
+                        @if (Model.TrangThai)
+                        {
+                            <span class="admin-chip admin-chip--ok">Active</span>
+                        }
+                        else
+                        {
+                            <span class="admin-chip admin-chip--bad">Locked</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="admin-details-item">
+                    <div class="admin-details-label">Họ tên</div>
+                    <div class="admin-details-value">@Model.DocGia?.HoTen</div>
+                </div>
+
+                <div class="admin-details-item">
+                    <div class="admin-details-label">Email</div>
+                    <div class="admin-details-value">@Model.DocGia?.Email</div>
+                </div>
+
+                <div class="admin-details-item">
+                    <div class="admin-details-label">Điện thoại</div>
+                    <div class="admin-details-value">@Model.DocGia?.DienThoai</div>
+                </div>
+
+                <div class="admin-details-item admin-details-item--full">
+                    <div class="admin-details-label">Địa chỉ</div>
+                    <div class="admin-details-value">@Model.DocGia?.DiaChi</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

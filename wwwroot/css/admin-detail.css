@@ -1,0 +1,108 @@
+﻿/* =========================
+   Admin Details polish
+   ========================= */
+
+.admin-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.admin-details-card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.admin-details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    border-top: 1px solid rgba(0,0,0,.06);
+}
+
+.admin-details-item {
+    padding: 16px 18px;
+    border-right: 1px solid rgba(0,0,0,.06);
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    background: #fff;
+}
+
+    .admin-details-item:nth-child(3n) {
+        border-right: 0;
+    }
+
+.admin-details-item--full {
+    grid-column: 1 / -1;
+    border-right: 0 !important;
+}
+
+.admin-details-label {
+    font-size: 12px;
+    color: rgba(0,0,0,.55);
+    letter-spacing: .2px;
+    margin-bottom: 6px;
+}
+
+.admin-details-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(0,0,0,.88);
+    line-height: 1.25;
+    word-break: break-word;
+}
+
+/* chips */
+.admin-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    border: 1px solid rgba(0,0,0,.08);
+    background: rgba(0,0,0,.04);
+    line-height: 1;
+}
+
+.admin-chip--role {
+    background: rgba(255,195,0,.18);
+    border-color: rgba(255,195,0,.25);
+}
+
+.admin-chip--ok {
+    background: rgba(92,184,92,.18);
+    border-color: rgba(92,184,92,.28);
+    color: rgba(0,0,0,.75);
+}
+
+.admin-chip--bad {
+    background: rgba(220,53,69,.14);
+    border-color: rgba(220,53,69,.25);
+    color: rgba(0,0,0,.75);
+}
+
+/* responsive */
+@media (max-width: 992px) {
+    .admin-details-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-details-item:nth-child(3n) {
+        border-right: 1px solid rgba(0,0,0,.06);
+    }
+
+    .admin-details-item:nth-child(2n) {
+        border-right: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-details-item {
+        border-right: 0;
+    }
+}

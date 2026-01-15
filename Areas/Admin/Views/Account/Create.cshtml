@@ -1,0 +1,96 @@
+﻿@model WebApplication1.VMs.AccountCreateVM
+
+@{
+    ViewData["Title"] = "Tạo tài khoản";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/css/CRUD.css"/>
+<div class="admin-page">
+
+    <div class="admin-toolbar">
+        <div>
+            <h1 class="admin-title">Tạo tài khoản</h1>
+            <div class="admin-subtitle">Tạo mới tài khoản + thông tin độc giả</div>
+        </div>
+
+        <a class="btn btn-outline-secondary admin-btn"
+           asp-area="Admin" asp-controller="Account" asp-action="Index">
+            <span class="admin-btn__icon">←</span> Back
+        </a>
+    </div>
+
+    <div class="admin-card admin-form-card">
+        <div class="admin-card__body p-0">
+            <div class="p-4">
+
+                <form method="post" class="row g-3">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <!-- TaiKhoan -->
+                    <div class="col-md-6">
+                        <label class="form-label">Tên đăng nhập</label>
+                        <input asp-for="TenDangNhap" class="form-control" />
+                        <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Mật khẩu</label>
+                        <input asp-for="MatKhau" class="form-control" type="password" />
+                        <span asp-validation-for="MatKhau" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Vai trò</label>
+                        <select asp-for="VaiTroId" asp-items="ViewBag.VaiTroList" class="form-select"></select>
+                        <span asp-validation-for="VaiTroId" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="TrangThai" class="form-check-input" />
+                            <label class="form-check-label">Kích hoạt</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12"><hr class="my-2" /></div>
+
+                    <!-- DocGia -->
+                    <div class="col-md-6">
+                        <label class="form-label">Họ tên</label>
+                        <input asp-for="HoTen" class="form-control" />
+                        <span asp-validation-for="HoTen" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Điện thoại</label>
+                        <input asp-for="DienThoai" class="form-control" />
+                        <span asp-validation-for="DienThoai" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Địa chỉ</label>
+                        <input asp-for="DiaChi" class="form-control" />
+                        <span asp-validation-for="DiaChi" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                        <a class="btn btn-outline-secondary admin-action-btn"
+                           asp-area="Admin" asp-controller="Account" asp-action="Index">Hủy</a>
+                        <button type="submit" class="btn btn-primary admin-action-btn">Tạo</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
