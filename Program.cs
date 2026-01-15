@@ -32,6 +32,7 @@ namespace WebApplication1
                 o.Cookie.IsEssential = true;
             });
 
+<<<<<<< HEAD
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(o =>
                 {
@@ -43,6 +44,16 @@ namespace WebApplication1
             {
                 o.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
             });
+=======
+            app.MapAreaControllerRoute(
+                name: "Admin",
+                areaName: "Admin",
+                pattern: "Admin/{controller=Dashboard}/{action=Index}/{id?}");
+
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+>>>>>>> origin/An
 
             var app = builder.Build();
 

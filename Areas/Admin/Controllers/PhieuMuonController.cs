@@ -12,6 +12,62 @@ namespace WebApplication1.Areas.Admin.Controllers
         private readonly QuanLyThuVienContext _db;
         public PhieuMuonController(QuanLyThuVienContext db) => _db = db;
 
+        // Danh sách
+        public async Task<IActionResult> Index()
+        {
+            var list = await _db.PhieuMuons
+                .Include(x => x.DocGia)
+                .OrderByDescending(x => x.PhieuMuonId)
+                .ToListAsync();
+
+            return View(list);
+        }
+
+        public IActionResult Create()
+        {
+            ViewBag.DocGiaId = _db.DocGia.ToList();
+            ViewBag.Sachs = _db.Saches
+                .Where(x => x.TinhTrang == "Con")
+                .ToList();
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(
+            int DocGiaId,
+            List<int> sachIds,
+            int soNgayMuon,
+            string? ghiChu)
+        {
+            var phieu = new PhieuMuon
+            {
+                DocGiaId = DocGiaId,
+                NgayMuon = DateTime.Now,
+                HanTra = DateOnly.FromDateTime(DateTime.Now.AddDays(soNgayMuon)),
+                TrangThai = "DangMuon",
+                GhiChu = ghiChu
+            };
+
+            _db.PhieuMuons.Add(phieu);
+            await _db.SaveChangesAsync();
+
+            foreach (var sid in sachIds)
+            {
+                _db.CtPhieuMuons.Add(new CtPhieuMuon
+                {
+                    PhieuMuonId = phieu.PhieuMuonId,
+                    SachId = sid
+                });
+
+                var sach = await _db.Saches.FindAsync(sid);
+                sach.TinhTrang = "DangMuon";
+            }
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
         public async Task<IActionResult> ChoDuyet()
         {
             var list = await _db.PhieuMuons

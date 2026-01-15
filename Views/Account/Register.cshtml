@@ -1,0 +1,350 @@
+﻿@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = null; // nếu muốn không bị dính layout ngoài
+}
+
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"]</title>
+
+    <style>
+        :root {
+            --bg1: #0b1220;
+            --bg2: #020617;
+            --card: rgba(15, 23, 42, .75);
+            --border: rgba(255,255,255,.12);
+            --muted: #9ca3af;
+            --text: #e5e7eb;
+            --accent: #38bdf8;
+            --accent2: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--text);
+            background: radial-gradient(900px 520px at 18% 10%, rgba(56,189,248,.22), transparent 60%), radial-gradient(900px 520px at 86% 25%, rgba(34,197,94,.16), transparent 60%), linear-gradient(135deg, var(--bg1), var(--bg2));
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .pattern {
+            position: absolute;
+            inset: -80px;
+            opacity: .14;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2338bdf8'/%3E%3Cstop offset='1' stop-color='%2322c55e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='2' opacity='0.9'%3E%3Cpath d='M34 52c10-6 24-6 34 0v78c-10-6-24-6-34 0V52z'/%3E%3Cpath d='M112 52c10-6 24-6 34 0v78c-10-6-24-6-34 0V52z'/%3E%3Cpath d='M68 52c10-6 24-6 34 0v78c-10-6-24-6-34 0V52z' opacity='.65'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 220px 220px;
+            mix-blend-mode: screen;
+        }
+
+        .wrap {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px 14px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .shell {
+            width: min(980px,100%);
+            display: grid;
+            grid-template-columns: 1.05fr .95fr;
+            gap: 18px;
+        }
+
+        .panel {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            background: rgba(255,255,255,.04);
+            box-shadow: 0 25px 80px rgba(0,0,0,.35);
+            position: relative;
+        }
+
+            .panel .cover {
+                position: absolute;
+                inset: 0;
+                background-image: linear-gradient(180deg, rgba(2,6,23,.25), rgba(2,6,23,.88)), url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1400&q=80');
+                background-size: cover;
+                background-position: center;
+            }
+
+            .panel .content {
+                position: relative;
+                padding: 22px;
+            }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, rgba(56,189,248,.85), rgba(34,197,94,.65));
+            font-weight: 900;
+        }
+
+        .panel h1 {
+            margin: 16px 0 8px;
+            font-size: 28px;
+            line-height: 1.1;
+        }
+
+        .panel p {
+            margin: 0;
+            color: rgba(229,231,235,.78);
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--card);
+            box-shadow: 0 25px 80px rgba(0,0,0,.45);
+            padding: 22px;
+            backdrop-filter: blur(10px);
+        }
+
+        .title {
+            margin: 2px 0 6px;
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            margin: 0 0 14px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .error {
+            background: rgba(127, 29, 29, .35);
+            border: 1px solid rgba(239, 68, 68, .35);
+            color: #fecaca;
+            padding: 10px 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: rgba(229,231,235,.85);
+            margin-bottom: 6px;
+        }
+
+        .field {
+            position: relative;
+        }
+
+        .icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: .85;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px 12px 11px 36px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: rgba(2,6,23,.55);
+            color: var(--text);
+            outline: none;
+        }
+
+            input:focus {
+                border-color: rgba(56,189,248,.55);
+                box-shadow: 0 0 0 4px rgba(56,189,248,.15);
+            }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0 14px;
+            gap: 10px;
+        }
+
+            .row a {
+                color: rgba(56,189,248,.9);
+                text-decoration: none;
+                font-size: 13px;
+            }
+
+                .row a:hover {
+                    text-decoration: underline;
+                }
+
+        .btn {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            padding: 11px 12px;
+            cursor: pointer;
+            font-weight: 700;
+            color: #04121f;
+            background: linear-gradient(90deg, rgba(56,189,248,.95), rgba(34,197,94,.85));
+            transition: .15s ease;
+        }
+
+            .btn:hover {
+                transform: translateY(-1px);
+                filter: brightness(1.05);
+            }
+
+        .foot {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(229,231,235,.55);
+        }
+
+       
+
+        {
+            grid-template-columns: 1fr;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="bg"><div class="pattern"></div></div>
+
+    <div class="wrap">
+        <div class="shell">
+            <div class="panel">
+                <div class="cover"></div>
+                <div class="content">
+                    <div class="brand">
+                        <div class="mark">LB</div>
+                        <div>
+                            <b>Library Online</b><br />
+                            <small style="color:rgba(229,231,235,.75)">Tạo tài khoản để mượn sách online</small>
+                        </div>
+                    </div>
+                    <h1>Tạo tài khoản mới</h1>
+                    <p>Điền thông tin và bắt đầu mượn sách nhanh chóng.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="title">Đăng ký</div>
+                <div class="subtitle">Hệ thống quản lý thư viện</div>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="error">@ViewBag.Error</div>
+                }
+
+                <form method="post" autocomplete="on">
+                    <div class="group">
+                        <label>Tên đăng nhập</label>
+                        <div class="field">
+                            <span class="icon">👤</span>
+                            <input name="tenDangNhap" placeholder="username..." required />
+                        </div>
+                    </div>
+
+                    <div class="grid">
+                        <div class="group">
+                            <label>Mật khẩu</label>
+                            <div class="field">
+                                <span class="icon">🔒</span>
+                                <input name="matKhau" type="password" placeholder="mật khẩu..." required />
+                            </div>
+                        </div>
+
+                        <div class="group">
+                            <label>Xác nhận mật khẩu</label>
+                            <div class="field">
+                                <span class="icon">✅</span>
+                                <input name="xacNhanMatKhau" type="password" placeholder="nhập lại..." required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <label>Họ tên</label>
+                        <div class="field">
+                            <span class="icon">🪪</span>
+                            <input name="hoTen" placeholder="Nguyễn Văn A..." required />
+                        </div>
+                    </div>
+
+                    <div class="grid">
+                        <div class="group">
+                            <label>Email</label>
+                            <div class="field">
+                                <span class="icon">✉️</span>
+                                <input name="email" type="email" placeholder="abc@gmail.com" />
+                            </div>
+                        </div>
+                        <div class="group">
+                            <label>Điện thoại</label>
+                            <div class="field">
+                                <span class="icon">📞</span>
+                                <input name="dienThoai" placeholder="09..." />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <label>Địa chỉ</label>
+                        <div class="field">
+                            <span class="icon">📍</span>
+                            <input name="diaChi" placeholder="Số nhà, đường, phường..." />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <a asp-controller="Account" asp-action="Login">← Đã có tài khoản? Đăng nhập</a>
+                        <a asp-controller="Home" asp-action="Index">Về trang chủ</a>
+                    </div>
+
+                    <button class="btn" type="submit">✨ Tạo tài khoản</button>
+                </form>
+
+                <div class="foot">© Thư viện online 2026</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

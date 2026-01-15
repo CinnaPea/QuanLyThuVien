@@ -5,8 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using WebApplication1.Models; // đổi namespace cho đúng
-
+using WebApplication1.Models; 
 namespace LibraryManagement.Controllers
 {
     public class AccountController : Controller
@@ -69,7 +68,7 @@ namespace LibraryManagement.Controllers
                 return Redirect(returnUrl);
 
             if (roleName.Equals("Admin", StringComparison.OrdinalIgnoreCase))
-                return RedirectToAction("Index", "Admin", new { area = "Admin" });
+                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
 
             return RedirectToAction("Index", "Home");
         }
@@ -82,6 +81,71 @@ namespace LibraryManagement.Controllers
             return RedirectToAction("Login");
         }
 
+        // ========== REGISTER ==========
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(string tenDangNhap, string matKhau, string xacNhanMatKhau,
+                                                 string hoTen, string? email, string? dienThoai, string? diaChi)
+        {
+            // basic validate
+            if (string.IsNullOrWhiteSpace(tenDangNhap) || string.IsNullOrWhiteSpace(matKhau) || string.IsNullOrWhiteSpace(hoTen))
+            {
+                ViewBag.Error = "Vui lòng nhập đầy đủ Tên đăng nhập, Mật khẩu và Họ tên.";
+                return View();
+            }
+
+            if (matKhau != xacNhanMatKhau)
+            {
+                ViewBag.Error = "Mật khẩu xác nhận không khớp.";
+                return View();
+            }
+
+            // check username exists
+            var exists = await _db.TaiKhoans.AnyAsync(x => x.TenDangNhap == tenDangNhap);
+            if (exists)
+            {
+                ViewBag.Error = "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.";
+                return View();
+            }
+
+            // 1) Create DocGia
+            var docGia = new DocGium
+            {
+                HoTen = hoTen,
+                Email = email,
+                DienThoai = dienThoai,
+                DiaChi = diaChi
+            };
+
+            _db.DocGia.Add(docGia);
+            await _db.SaveChangesAsync(); // lấy DocGiaId
+
+            // 2) Create TaiKhoan
+            var tk = new TaiKhoan
+            {
+                TenDangNhap = tenDangNhap,
+                MatKhauHash = Sha256(matKhau),
+                VaiTroId = 2, // User role
+                TrangThai = true,
+                DocGiaId = docGia.DocGiaId
+            };
+
+            _db.TaiKhoans.Add(tk);
+            await _db.SaveChangesAsync();
+
+            // auto login (session)
+            HttpContext.Session.SetString("DOCGIA_ID", docGia.DocGiaId.ToString());
+            HttpContext.Session.SetString("ROLE", "User");
+            HttpContext.Session.SetString("USERNAME", tenDangNhap);
+
+            TempData["SuccessMessage"] = "Đăng ký thành công! Bạn đã đăng nhập.";
+            return RedirectToAction("Index", "Home");
+        }
         public IActionResult AccessDenied() => View();
 
         private static string Sha256(string input)
