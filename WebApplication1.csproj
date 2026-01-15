@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\NewFolder\" />
+    <Folder Include="Areas\Admin\Views\Admin\" />
   </ItemGroup>
 
 </Project>

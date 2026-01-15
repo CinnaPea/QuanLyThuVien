@@ -1,0 +1,192 @@
+﻿@model List<WebApplication1.VMs.DauSachListItemVM>
+@using WebApplication1.Models
+
+@{
+    ViewData["Title"] = "Danh sách sách";
+
+    var theLoais = ViewBag.TheLoais as List<TheLoai> ?? new();
+    var nhaXuatBans = ViewBag.NhaXuatBans as List<NhaXuatBan> ?? new();
+    var tacGias = ViewBag.TacGias as List<TacGium> ?? new();
+
+    string q = ViewBag.Q as string ?? "";
+    int? theLoaiId = ViewBag.TheLoaiId as int?;
+    int? nhaXuatBanId = ViewBag.NhaXuatBanId as int?;
+    int? tacGiaId = ViewBag.TacGiaId as int?;
+}
+
+<link rel="stylesheet" href="~/css/library-home.css" />
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" asp-controller="Home" asp-action="Index">
+            <div class="logo">LB</div>
+            <div>
+                <b>Library Online</b><br />
+                <small>Danh sách đầu sách</small>
+            </div>
+        </a>
+
+        <nav class="nav">
+            <a class="btn" asp-controller="Home" asp-action="Index">🏠 Trang chủ</a>
+            <a class="btn" asp-controller="Borrow" asp-action="Cart">🧺 Giỏ mượn</a>
+            <a class="btn primary" asp-controller="Account" asp-action="Login">🔐 Đăng nhập</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+
+    <form class="topbar" method="get">
+        <div class="topbar-title">
+            <h2>Sách</h2>
+            <span class="muted">Tìm kiếm & lọc theo thể loại / NXB / tác giả</span>
+        </div>
+
+        <div class="topbar-search">
+            <input name="q" value="@q" placeholder="Nhập tiêu đề hoặc ISBN..." />
+            <button class="btn primary" type="submit">🔎 Tìm</button>
+
+            @if (theLoaiId.HasValue)
+            {
+                <input type="hidden" name="theLoaiId" value="@theLoaiId" />
+            }
+            @if (nhaXuatBanId.HasValue)
+            {
+                <input type="hidden" name="nhaXuatBanId" value="@nhaXuatBanId" />
+            }
+            @if (tacGiaId.HasValue)
+            {
+                <input type="hidden" name="tacGiaId" value="@tacGiaId" />
+            }
+        </div>
+    </form>
+
+    <div class="books-layout">
+
+        <aside class="filter-card">
+            <div class="filter-head">
+                <h3>Bộ lọc</h3>
+                <a class="filter-reset" asp-controller="Book" asp-action="Index">Reset</a>
+            </div>
+
+            <form method="get" class="filter-form">
+                <div class="field">
+                    <label>Thể loại</label>
+                    <select name="theLoaiId">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var tl in theLoais)
+                        {
+                            <option value="@tl.TheLoaiId" selected="@(theLoaiId == tl.TheLoaiId)">
+                                @tl.TenTheLoai
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Nhà xuất bản</label>
+                    <select name="nhaXuatBanId">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var nxb in nhaXuatBans)
+                        {
+                            <option value="@nxb.NhaXuatBanId" selected="@(nhaXuatBanId == nxb.NhaXuatBanId)">
+                                @nxb.TenNxb
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Tác giả</label>
+                    <select name="tacGiaId">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var tg in tacGias)
+                        {
+                            <option value="@tg.TacGiaId" selected="@(tacGiaId == tg.TacGiaId)">
+                                @tg.TenTacGia
+                            </option>
+                        }
+                    </select>
+                </div>
+
+               
+
+                <button class="btn primary w-100" type="submit">Áp dụng lọc</button>
+            </form>
+
+            <div class="filter-note">
+                “Có thể mượn” = số cuốn có <b>TinhTrang = Con</b>.
+            </div>
+        </aside>
+
+        <main>
+            <div class="list-head">
+                <div>
+                    <h3>Kết quả</h3>
+                    <span class="muted">@Model.Count đầu sách</span>
+                </div>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="empty">
+                    <b>Không tìm thấy sách phù hợp.</b>
+                    <div class="muted">Thử đổi từ khóa hoặc Reset bộ lọc.</div>
+                </div>
+            }
+            else
+            {
+                <div class="book-list">
+                    @foreach (var ds in Model)
+                    {
+                        var availClass = ds.AvailableCount > 0 ? "avail ok" : "avail bad";
+                        var availText = ds.AvailableCount > 0
+                        ? $"Có thể mượn: {ds.AvailableCount}/{ds.TotalCount}"
+                        : $"Hết sách (0/{ds.TotalCount})";
+
+                        <div class="book-row">
+                            <div class="book-left">
+                                <div class="book-title">@ds.TieuDe</div>
+
+                                <div class="book-sub">
+                                    <span class="tag">@((ds.TenTheLoai ?? "Sách"))</span>
+                                    <span class="dot">•</span>
+                                    <span><b>Tác giả:</b> @(ds.TacGiaText ?? "-")</span>
+                                </div>
+
+                                <div class="book-sub muted">
+                                    <span><b>NXB:</b> @(ds.TenNXB ?? "-")</span>
+                                    <span class="dot">•</span>
+                                    <span><b>ISBN:</b> @(ds.ISBN ?? "-")</span>
+                                </div>
+
+                                <div class="@availClass">@availText</div>
+                            </div>
+
+                            <div class="book-right">
+                                <a class="btn"
+                                   asp-controller="Book"
+                                   asp-action="Details"
+                                   asp-route-id="@ds.DauSachId">
+                                    Xem
+                                </a>
+
+                                @if (ds.AvailableCount > 0)
+                                {
+                                    <form asp-controller="Borrow" asp-action="AddToCart" method="post">
+                                        <input type="hidden" name="dauSachId" value="@ds.DauSachId" />
+                                        <button class="btn primary" type="submit">🧺 Thêm giỏ</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button class="btn" type="button" disabled>Hết sách</button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </main>
+    </div>
+</div>

@@ -1,0 +1,36 @@
+﻿<h2>Lập phiếu mượn</h2>
+
+<form method="post">
+    <div>
+        <label>Độc giả</label>
+        <select name="DocGiaId">
+            @foreach (var dg in ViewBag.DocGiaId)
+            {
+                    <option value="@dg.DocGiaId">@dg.TenDocGia</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <label>Số ngày mượn</label>
+        <input name="soNgayMuon" type="number" value="7" />
+    </div>
+
+    <div>
+        <label>Chọn sách</label>
+        @foreach (var s in ViewBag.Sachs)
+        {
+                <div>
+                    <input type="checkbox" name="sachIds" value="@s.SachId" />
+                @s.DauSach.TieuDe - @s.MaVach
+                </div>
+        }
+    </div>
+
+    <div>
+        <label>Ghi chú</label>
+        <input name="ghiChu" />
+    </div>
+
+    <button type="submit">Lập phiếu</button>
+</form>
