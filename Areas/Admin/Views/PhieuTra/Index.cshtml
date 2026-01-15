@@ -1,4 +1,4 @@
-﻿@model List<WebApplication1.Models.PhieuMuon>
+﻿@model WebApplication1.VMs.PhieuTraIndexVM
 
 @{
     ViewData["Title"] = "Trả sách";
@@ -6,9 +6,6 @@
 }
 
 <style>
-    /* =========================
-           Admin CRUD Page (DauSach)
-           ========================= */
     .admin-page {
         padding: 10px 0 30px;
     }
@@ -17,235 +14,201 @@
         display: flex;
         align-items: flex-end;
         justify-content: space-between;
-        gap: 12px;
         margin: 8px 0 14px;
-        flex-wrap: wrap;
     }
 
     .admin-title {
-        margin: 0;
         font-size: 26px;
         font-weight: 700;
-        letter-spacing: .2px;
     }
 
     .admin-subtitle {
-        margin-top: 6px;
-        color: rgba(0,0,0,.55);
         font-size: 13px;
-    }
-
-    .admin-btn {
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-weight: 600;
-    }
-
-    .admin-btn__icon {
-        display: inline-block;
-        margin-right: 6px;
-        font-weight: 900;
-        transform: translateY(-1px);
+        color: rgba(0,0,0,.55);
     }
 
     .admin-card {
         background: #fff;
-        border: 1px solid rgba(0,0,0,.08);
         border-radius: 14px;
         box-shadow: 0 10px 30px rgba(0,0,0,.06);
+        border: 1px solid rgba(0,0,0,.08);
         overflow: hidden;
+        margin-top: 16px;
     }
 
-    .admin-card__body {
-        padding: 0;
-    }
-
-    .admin-table {
-        margin: 0;
-    }
-
-        .admin-table thead th {
-            background: rgba(0,0,0,.03);
-            border-bottom: 1px solid rgba(0,0,0,.08) !important;
-            font-weight: 700;
-            font-size: 12px;
-            letter-spacing: .4px;
-            text-transform: uppercase;
-            padding: 14px 12px !important;
-            white-space: nowrap;
-        }
-
-        .admin-table tbody td {
-            padding: 14px 12px !important;
-            vertical-align: middle !important;
-        }
-
-    .admin-title-cell__name {
+    .admin-table thead th {
+        background: rgba(0,0,0,.03);
+        font-size: 12px;
         font-weight: 700;
-        line-height: 1.25;
+        text-transform: uppercase;
+        padding: 14px 12px;
+    }
+
+    .admin-table tbody td {
+        padding: 14px 12px;
+        vertical-align: middle;
     }
 
     .admin-mono {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         font-size: 12.5px;
-    }
-
-    .admin-muted {
-        color: rgba(0,0,0,.45);
-    }
-
-    .admin-pill {
-        display: inline-block;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: rgba(0,0,0,.06);
-        font-size: 12px;
-        font-weight: 600;
-        line-height: 1;
-    }
-
-    .admin-pill--soft {
-        background: rgba(255,195,0,.18); /* “corporate gold” */
-    }
-
-    .admin-pill--isbn {
-        background: rgba(0,0,0,.08);
-    }
-
-    .admin-action-btn {
-        border-radius: 10px;
-        padding: 7px 10px;
-        font-weight: 700;
-    }
-
-    .admin-inline-form {
-        display: inline-block;
-        margin: 0 0 0 6px;
     }
 
     .admin-empty {
         text-align: center;
-        padding: 28px 12px !important;
+        padding: 28px;
         color: rgba(0,0,0,.55);
-        background: #fff;
-    }
-    /* ===== Returns / PhieuTra extras ===== */
-    .admin-alert {
-        border-radius: 12px;
-        margin-bottom: 12px;
     }
 
-    .admin-status--unknown {
-        background: rgba(0,0,0,.08);
-        color: rgba(0,0,0,.65);
+    .pill {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-block;
     }
 
-    /* row hinting */
-    .admin-table tr.is-overdue td {
-        background: rgba(220,53,69,.06);
+    .pill-ok {
+        background: rgba(40,167,69,.2);
     }
 
-    .admin-table tr.is-ontime td {
-        background: transparent;
+    .pill-late {
+        background: rgba(220,53,69,.2);
     }
 
+    .pill-done {
+        background: rgba(0,123,255,.18);
+    }
+
+    .admin-action-btn {
+        border-radius: 10px;
+        font-weight: 700;
+        padding: 6px 10px;
+    }
 </style>
+
 <div class="admin-page">
 
-    <!-- Toolbar -->
+    <!-- ===== PHIẾU ĐANG MƯỢN ===== -->
     <div class="admin-toolbar">
-        <div class="admin-toolbar__left">
+        <div>
             <h2 class="admin-title">↩️ Trả sách</h2>
-            <div class="admin-subtitle">Danh sách phiếu đang mượn — chọn phiếu để lập phiếu trả.</div>
+            <div class="admin-subtitle">
+                Danh sách phiếu đang mượn — chọn để lập phiếu trả
+            </div>
         </div>
     </div>
 
     @if (TempData["ok"] != null)
     {
-        <div class="alert alert-success admin-alert">
-            @TempData["ok"]
-        </div>
+        <div class="alert alert-success">@TempData["ok"]</div>
     }
 
     <div class="admin-card">
-        <div class="admin-card__body">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped admin-table">
-                    <thead>
+        <div class="table-responsive">
+            <table class="table table-hover admin-table">
+                <thead>
+                    <tr>
+                        <th style="width:90px;">Mã</th>
+                        <th>Độc giả</th>
+                        <th style="width:150px;">Ngày mượn</th>
+                        <th style="width:150px;">Hạn trả</th>
+                        <th style="width:120px;">Trạng thái</th>
+                        <th style="width:140px;" class="text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.DangMuon.Any())
+                    {
                         <tr>
-                            <th style="width:90px;">Mã</th>
-                            <th>Độc giả</th>
-                            <th style="width:160px;">Ngày mượn</th>
-                            <th style="width:160px;">Hạn trả</th>
-                            <th style="width:120px;" class="text-center">Trạng thái</th>
-                            <th style="width:170px;" class="text-right">Thao tác</th>
+                            <td colspan="6" class="admin-empty">
+                                Không có phiếu nào đang mượn
+                            </td>
                         </tr>
-                    </thead>
+                    }
+                    else
+                    {
+                        var today = DateOnly.FromDateTime(DateTime.Now);
 
-                    <tbody>
-                        @if (Model == null || !Model.Any())
+                        foreach (var p in Model.DangMuon)
                         {
+                            var overdue = today > p.HanTra;
+
                             <tr>
-                                <td colspan="6" class="admin-empty">
-                                    Hiện không có phiếu nào đang mượn.
+                                <td class="admin-mono">#@p.PhieuMuonId</td>
+                                <td>@p.DocGia?.HoTen</td>
+                                <td class="admin-mono">@p.NgayMuon.ToString("dd/MM/yyyy")</td>
+                                <td class="admin-mono">@p.HanTra.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <span class="pill @(overdue ? "pill-late" : "pill-ok")">
+                                        @(overdue ? "QUÁ HẠN" : "CÒN HẠN")
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <a asp-action="ReturnForm"
+                                       asp-route-id="@p.PhieuMuonId"
+                                       class="btn btn-sm btn-primary admin-action-btn">
+                                        Lập phiếu trả
+                                    </a>
                                 </td>
                             </tr>
                         }
-                        else
-                        {
-                            var today = DateTime.Today;
-
-                            foreach (var p in Model)
-                            {
-                                // Null-safe + overdue detect
-                                var due = p.HanTra;
-                                var isOverdue = (due != DateOnly.FromDayNumber(DateTime.Now.Day) && due.Day < today.Day);
-
-                                <tr class="@(isOverdue ? "is-overdue" : "is-ontime")">
-                                    <td class="admin-mono">#@p.PhieuMuonId</td>
-
-                                    <td>
-                                        <div class="admin-title-cell__name">
-                                            @(p.DocGia?.HoTen ?? "—")
-                                        </div>
-                                    </td>
-
-                                    <td class="admin-mono">
-                                        @(p.NgayMuon == default(DateTime) ? "—" : p.NgayMuon.ToString("dd/MM/yyyy"))
-                                    </td>
-
-                                    <td class="admin-mono">
-                                        @(p.HanTra == DateOnly.FromDayNumber(DateTime.Now.Day) ? "—" : p.HanTra.ToString("dd/MM/yyyy"))
-                                    </td>
-
-                                    <td class="text-center">
-                                        @if (due == DateOnly.FromDayNumber(DateTime.Now.Day))
-                                        {
-                                            <span class="admin-status admin-status--unknown">CHƯA RÕ</span>
-                                        }
-                                        else if (isOverdue)
-                                        {
-                                            <span class="admin-status admin-status--unpaid">QUÁ HẠN</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="admin-status admin-status--paid">CÒN HẠN</span>
-                                        }
-                                    </td>
-
-                                    <td class="text-right">
-                                        <a asp-action="ReturnForm" asp-route-id="@p.PhieuMuonId"
-                                           class="btn btn-sm btn-primary admin-action-btn">
-                                            Lập phiếu trả
-                                        </a>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
+
+    <!-- ===== LỊCH SỬ PHIẾU TRẢ ===== -->
+    <h2 class="admin-title mt-5">📜 Lịch sử phiếu trả</h2>
+    <div class="admin-subtitle">Danh sách các lần trả sách đã lập</div>
+
+    <div class="admin-card">
+        <div class="table-responsive">
+            <table class="table table-hover admin-table">
+                <thead>
+                    <tr>
+                        <th style="width:90px;">Mã trả</th>
+                        <th>Mã mượn</th>
+                        <th>Độc giả</th>
+                        <th style="width:160px;">Ngày trả</th>
+                        <th style="width:130px;" class="text-right">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.LichSuTra.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="admin-empty">
+                                Chưa có phiếu trả nào
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var pt in Model.LichSuTra)
+                        {
+                            <tr>
+                                <td class="admin-mono">#@pt.PhieuTraId</td>
+                                <td class="admin-mono">#@pt.PhieuMuonId</td>
+                                <td>@pt.PhieuMuon?.DocGia?.HoTen</td>
+                                <td class="admin-mono">
+                                    @pt.NgayTra.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="text-right">
+                                    <a asp-action="Details"
+                                       asp-route-id="@pt.PhieuTraId"
+                                       class="btn btn-sm btn-secondary admin-action-btn">
+                                        Xem
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 
 </div>

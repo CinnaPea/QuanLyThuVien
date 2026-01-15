@@ -24,7 +24,7 @@ namespace WebApplication1
             // Debug chuỗi kết nối thật sự
             var cs = builder.Configuration.GetConnectionString("DefaultConnection");
             Console.WriteLine(">>> DefaultConnection = " + (cs ?? "NULL"));
-
+            builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(o =>
             {
                 o.IdleTimeout = TimeSpan.FromMinutes(60);

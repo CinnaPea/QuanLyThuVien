@@ -1,24 +1,60 @@
 ﻿@model WebApplication1.Models.PhieuMuon
 @{
     var ct = ViewBag.CT as List<WebApplication1.Models.CtPhieuMuon> ?? new();
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
+
 <h2>Lập phiếu trả cho phiếu mượn #@Model.PhieuMuonId</h2>
 
-<p>Độc giả: @Model.DocGia?.HoTen</p>
-<p>Hạn trả: @Model.HanTra</p>
+<p>Độc giả: <strong>@Model.DocGia?.HoTen</strong></p>
+<p>Hạn trả: <strong>@Model.HanTra</strong></p>
 
-<table border="1" cellpadding="6">
-    <tr><th>Mã sách</th><th>Đầu sách</th></tr>
-    @foreach (var x in ct)
-    {
-        <tr>
-            <td>@x.SachId</td>
-            <td>@x.Sach?.DauSach?.TieuDe</td>
-        </tr>
-    }
-</table>
+<form method="post" asp-action="ReturnSelected">
 
-<form method="post" asp-action="ReturnAll">
     <input type="hidden" name="phieuMuonId" value="@Model.PhieuMuonId" />
-    <button type="submit">Xác nhận trả tất cả</button>
+
+    <table border="1" cellpadding="6" width="100%">
+        <tr>
+            <th>Chọn</th>
+            <th>Mã sách</th>
+            <th>Đầu sách</th>
+            <th>Tình trạng khi trả</th>
+        </tr>
+
+        @foreach (var x in ct.Where(c => c.NgayTraThucTe == null))
+        {
+            <tr>
+                <td align="center">
+                    <input type="checkbox"
+                           name="sachIds"
+                           value="@x.SachId"
+                           class="chk-sach"
+                           data-id="@x.SachId" />
+                </td>
+
+                <td>@x.SachId</td>
+
+                <td>@x.Sach?.DauSach?.TieuDe</td>
+
+                <td>
+                    <select name="tinhTrang_@x.SachId"
+                            class="tinh-trang"
+                            data-id="@x.SachId">
+                        <option value="Con">Còn</option>
+                        <option value="HuHong">Hư hỏng</option>
+                        <option value="Mat">Mất sách</option>
+                    </select>
+                </td>
+            </tr>
+        }
+    </table>
+
+    <br />
+
+    <button type="submit">✔ Trả sách đã chọn</button>
+    <button type="submit" formaction="/Admin/PhieuTra/ReturnAll">
+        ✔ Trả tất cả
+    </button>
 </form>
+
+

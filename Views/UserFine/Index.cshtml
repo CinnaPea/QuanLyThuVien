@@ -1,0 +1,74 @@
+﻿@model List<WebApplication1.Models.Phat>
+@{
+    ViewData["Title"] = "Phiếu phạt của tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/library-home.css" />
+
+<div class="container">
+    <div class="page-head">
+        <div>
+            <h2>💸 Phiếu phạt của tôi</h2>
+            <div class="muted">Các khoản phạt phát sinh do trễ hạn / hư hỏng / mất sách…</div>
+        </div>
+        <a class="btn" asp-controller="UserBorrow" asp-action="Index">🧾 Phiếu mượn</a>
+    </div>
+
+    <div class="card">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="empty">
+                <b>Bạn không có khoản phạt nào 🎉</b>
+                <div class="muted">Hãy trả sách đúng hạn để tránh phát sinh phí phạt.</div>
+            </div>
+        }
+        else
+        {
+            decimal total = Model.Sum(x => x.SoTien);
+            decimal unpaid = Model.Where(x => x.DaThanhToan == false).Sum(x => x.SoTien);
+
+            <div class="summary-row">
+                <div class="sum-box">
+                    <b>Tổng phạt</b>
+                    <div class="sum-money">@total.ToString("#,##0") đ</div>
+                </div>
+                <div class="sum-box">
+                    <b>Chưa thanh toán</b>
+                    <div class="sum-money">@unpaid.ToString("#,##0") đ</div>
+                </div>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mã phạt</th>
+                        <th>Phiếu mượn</th>
+                        <th>Lý do</th>
+                        <th>Ngày lập</th>
+                        <th>Số tiền</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in Model)
+                    {
+                        var badge = f.DaThanhToan ? "badge ok" : "badge warn";
+                        <tr>
+                            <td><b>#@f.PhatId</b></td>
+                            <td><b>#@f.PhieuMuonId</b></td>
+                            <td>@(string.IsNullOrWhiteSpace(f.LyDo) ? "-" : f.LyDo)</td>
+                            <td>@f.NgayLap.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><b>@f.SoTien.ToString("#,##0") đ</b></td>
+                            <td><span class="@badge">@(f.DaThanhToan ? "Đã thanh toán" : "Chưa thanh toán")</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="muted" style="margin-top:12px;">
+                * Thanh toán phạt thường do thủ thư/admin ghi nhận khi bạn nộp phạt trực tiếp.
+            </div>
+        }
+    </div>
+</div>

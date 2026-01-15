@@ -1,131 +1,262 @@
-﻿using WebApplication1.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using WebApplication1;
-namespace LibraryManagement.Controllers
+using WebApplication1.Helpers;
+using WebApplication1.Models;
+using WebApplication1.VMs;
+
+namespace WebApplication1.Controllers
 {
-    [Authorize]
     public class BorrowController : Controller
     {
+        private const string CART_KEY = "BORROW_CART_V1";
         private readonly QuanLyThuVienContext _db;
+
         public BorrowController(QuanLyThuVienContext db) => _db = db;
 
-        private const string CART_KEY = "BORROW_CART";
+        // ===== session helpers =====
+        private List<BorrowCartItemDto> GetCart()
+            => SessionJson.Get<List<BorrowCartItemDto>>(HttpContext.Session, CART_KEY) ?? new List<BorrowCartItemDto>();
 
+        private void SaveCart(List<BorrowCartItemDto> cart)
+            => SessionJson.Set(HttpContext.Session, CART_KEY, cart);
+
+        // ===== add đầu sách vào giỏ =====
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int sachId)
+        public async Task<IActionResult> Add(int dauSachId, string? returnUrl = null)
         {
-            var sach = await _db.Saches.FirstOrDefaultAsync(x => x.SachId == sachId);
-            if (sach == null) return NotFound();
+            var ds = await _db.DauSaches.FirstOrDefaultAsync(x => x.DauSachId == dauSachId);
+            if (ds == null) return NotFound();
 
-            if (!(sach.TinhTrang == "Con" || sach.TinhTrang == "Available"))
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(x => x.DauSachId == dauSachId);
+
+            var available = await _db.Saches.CountAsync(s => s.DauSachId == dauSachId && s.TinhTrang == "Con");
+
+            if (available <= 0)
             {
-                TempData["err"] = "Sách không còn khả dụng.";
-                return RedirectToAction("Details", "Books", new { id = sach.DauSachId });
+                TempData["CartMessage"] = "❌ Đầu sách này hiện không còn cuốn nào có thể mượn.";
+                TempData["CartMessageType"] = "error";
+                return Redirect(returnUrl ?? Url.Action("Index", "Book")!);
             }
 
-            var cart = HttpContext.Session.GetObject<List<int>>(CART_KEY) ?? new List<int>();
-            if (!cart.Contains(sachId)) cart.Add(sachId);
-            HttpContext.Session.SetObject(CART_KEY, cart);
+            if (item == null)
+                cart.Add(new BorrowCartItemDto { DauSachId = dauSachId, Qty = 1, Selected = true });
+            else if (item.Qty < available)
+                item.Qty += 1;
 
-            TempData["ok"] = "Đã thêm vào giỏ mượn.";
-            return RedirectToAction("Cart");
+            SaveCart(cart);
+
+            TempData["CartMessage"] = "✅ Đã thêm vào giỏ mượn.";
+            TempData["CartMessageType"] = "success";
+
+            return Redirect(returnUrl ?? Url.Action("Index", "Book")!);
         }
 
+
+        // ===== xem giỏ =====
+        [HttpGet]
         public async Task<IActionResult> Cart()
         {
-            var cart = HttpContext.Session.GetObject<List<int>>(CART_KEY) ?? new List<int>();
+            var cart = GetCart();
+            var vm = new BorrowCartVM();
 
-            var items = await _db.Saches
-                .Include(x => x.DauSach)
-                .Where(x => cart.Contains(x.SachId))
+            if (cart.Count == 0) return View(vm);
+
+            var ids = cart.Select(x => x.DauSachId).ToList();
+
+            var dauSachs = await _db.DauSaches
+                .Include(x => x.TheLoai)
+                .Include(x => x.NhaXuatBan)
+                .Where(x => ids.Contains(x.DauSachId))
                 .ToListAsync();
 
-            return View(items);
+            // available theo đầu sách
+            var availDict = await _db.Saches
+                .Where(s => ids.Contains(s.DauSachId))
+                .GroupBy(s => s.DauSachId)
+                .Select(g => new
+                {
+                    DauSachId = g.Key,
+                    Available = g.Count(x => x.TinhTrang == "Con")
+                })
+                .ToDictionaryAsync(x => x.DauSachId, x => x.Available);
+
+            foreach (var ds in dauSachs.OrderBy(x => x.TieuDe))
+            {
+                var dto = cart.First(x => x.DauSachId == ds.DauSachId);
+                availDict.TryGetValue(ds.DauSachId, out var av);
+
+                // clamp qty theo available (đề phòng kho thay đổi)
+                var qty = dto.Qty;
+                if (av <= 0) qty = 0;
+                else if (qty > av) qty = av;
+
+                vm.Items.Add(new BorrowCartItemVM
+                {
+                    DauSachId = ds.DauSachId,
+                    TieuDe = ds.TieuDe,
+                    TheLoai = ds.TheLoai?.TenTheLoai,
+                    NXB = ds.NhaXuatBan?.TenNxb,
+                    Available = av,
+                    Qty = qty,
+                    Selected = dto.Selected
+                });
+            }
+
+            // cập nhật lại giỏ (nếu qty bị clamp)
+            foreach (var row in vm.Items)
+            {
+                var dto = cart.First(x => x.DauSachId == row.DauSachId);
+                dto.Qty = row.Qty;
+            }
+            SaveCart(cart);
+
+            return View(vm);
         }
 
+        // ===== tăng số lượng (+1) =====
         [HttpPost]
-        public IActionResult Remove(int sachId)
+        public async Task<IActionResult> Plus(int dauSachId)
         {
-            var cart = HttpContext.Session.GetObject<List<int>>(CART_KEY) ?? new List<int>();
-            cart.Remove(sachId);
-            HttpContext.Session.SetObject(CART_KEY, cart);
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(x => x.DauSachId == dauSachId);
+            if (item == null) return RedirectToAction("Cart");
+
+            var available = await _db.Saches.CountAsync(s => s.DauSachId == dauSachId && s.TinhTrang == "Con");
+            if (item.Qty < available) item.Qty += 1;
+
+            SaveCart(cart);
             return RedirectToAction("Cart");
         }
 
+        // ===== giảm số lượng (-1) =====
         [HttpPost]
-        public async Task<IActionResult> CreatePhieuMuonOnline(string? ghiChu)
+        public IActionResult Minus(int dauSachId)
         {
-            var cart = HttpContext.Session.GetObject<List<int>>(CART_KEY) ?? new List<int>();
-            if (!cart.Any())
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(x => x.DauSachId == dauSachId);
+            if (item == null) return RedirectToAction("Cart");
+
+            item.Qty -= 1;
+            if (item.Qty <= 0)
+                cart.Remove(item);
+
+            SaveCart(cart);
+            return RedirectToAction("Cart");
+        }
+
+        // ===== toggle checkbox =====
+        [HttpPost]
+        public IActionResult ToggleSelect(int dauSachId, bool selected)
+        {
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(x => x.DauSachId == dauSachId);
+            if (item != null)
             {
-                TempData["err"] = "Giỏ mượn trống.";
+                item.Selected = selected;
+                SaveCart(cart);
+            }
+            return RedirectToAction("Cart");
+        }
+
+        // ===== xóa dòng =====
+        [HttpPost]
+        public IActionResult Remove(int dauSachId)
+        {
+            var cart = GetCart();
+            cart.RemoveAll(x => x.DauSachId == dauSachId);
+            SaveCart(cart);
+            return RedirectToAction("Cart");
+        }
+
+        // ===== xóa hết =====
+        [HttpPost]
+        public IActionResult Clear()
+        {
+            HttpContext.Session.Remove(CART_KEY);
+            return RedirectToAction("Cart");
+        }
+
+        // ===== Lập phiếu mượn cho những dòng được chọn =====
+        // NOTE: bạn có thể lấy docGiaId từ login/session, ở đây demo nhập docGiaId
+        [HttpPost]
+        public async Task<IActionResult> CreateBorrowSlip(int soNgayMuon = 7)
+        {
+            // ===== CHECK LOGIN + ROLE =====
+            var role = HttpContext.Session.GetString("ROLE");
+            if (role != "User")
+            {
+                TempData["Error"] = "Chỉ độc giả mới được lập phiếu mượn.";
                 return RedirectToAction("Cart");
             }
 
-            // Lấy DocGiumId từ claim (được set khi đăng nhập)
-            var docGiumIdStr = User.FindFirstValue("DocGiumId");
-            if (string.IsNullOrWhiteSpace(docGiumIdStr))
+            var docGiaId = HttpContext.Session.GetInt32("DOCGIA_ID");
+            if (docGiaId == null)
             {
-                TempData["err"] = "Tài khoản chưa gắn DocGia.";
+                TempData["Error"] = "Không xác định được độc giả.";
                 return RedirectToAction("Cart");
             }
 
-            int docGiumId = int.Parse(docGiumIdStr);
+            // ===== GIỎ =====
+            var cart = GetCart();
+            var selectedItems = cart.Where(x => x.Selected && x.Qty > 0).ToList();
 
-            var saches = await _db.Saches.Where(x => cart.Contains(x.SachId)).ToListAsync();
-            if (saches.Any(s => !(s.TinhTrang == "Con" || s.TinhTrang == "Available")))
+            if (!selectedItems.Any())
             {
-                TempData["err"] = "Có sách trong giỏ không còn khả dụng. Hãy kiểm tra lại.";
+                TempData["Error"] = "Bạn chưa chọn đầu sách nào.";
                 return RedirectToAction("Cart");
             }
 
+            if (soNgayMuon < 1) soNgayMuon = 7;
+
+            // ===== TẠO PHIẾU =====
             var phieu = new PhieuMuon
             {
-                DocGiaId = docGiumId,
+                DocGiaId = docGiaId.Value,
                 NgayMuon = DateTime.Now,
-                HanTra = DateOnly.FromDateTime(DateTime.Now.AddDays(45)) // hoặc 0 ngày tùy bạn
- ,              // admin duyệt thì mới set
-                TrangThai = "ChoDuyet",
-                GhiChu = ghiChu
+                HanTra = DateOnly.FromDateTime(DateTime.Now.AddDays(soNgayMuon)),
+                TrangThai = "ChoDuyet"
             };
 
             _db.PhieuMuons.Add(phieu);
             await _db.SaveChangesAsync();
 
-            foreach (var s in saches)
+            // ===== TẠO CHI TIẾT =====
+            foreach (var it in selectedItems)
             {
-                _db.CtPhieuMuons.Add(new CtPhieuMuon
+                var books = await _db.Saches
+                    .Where(s => s.DauSachId == it.DauSachId && s.TinhTrang == "Con")
+                    .OrderBy(s => s.SachId)
+                    .Take(it.Qty)
+                    .ToListAsync();
+
+                if (books.Count < it.Qty)
                 {
-                    PhieuMuonId = phieu.PhieuMuonId,
-                    SachId = s.SachId,
-                    NgayTraThucTe = null,
-                    TinhTrangLucMuon = s.TinhTrang,
-                    TinhTrangLucTra = null
-                });
+                    TempData["Error"] = "Số lượng sách không đủ.";
+                    return RedirectToAction("Cart");
+                }
+
+                foreach (var sach in books)
+                {
+                    _db.CtPhieuMuons.Add(new CtPhieuMuon
+                    {
+                        PhieuMuonId = phieu.PhieuMuonId,
+                        SachId = sach.SachId
+                    });
+
+                   // sach.TinhTrang = "DangMuon";
+                }
             }
 
             await _db.SaveChangesAsync();
 
-            HttpContext.Session.Remove(CART_KEY);
-            TempData["ok"] = $"Tạo phiếu mượn online thành công (Mã: {phieu.PhieuMuonId}).";
-            return RedirectToAction("MyBorrows");
+            // ===== XÓA DÒNG ĐÃ CHỌN =====
+            cart = cart.Where(x => !x.Selected).ToList();
+            SaveCart(cart);
+
+            TempData["Success"] = $"Đã lập phiếu mượn #{phieu.PhieuMuonId}.";
+            return RedirectToAction("Cart");
         }
 
-        public async Task<IActionResult> MyBorrows()
-        {
-            var docGiumIdStr = User.FindFirstValue("DocGiumId");
-            if (string.IsNullOrWhiteSpace(docGiumIdStr)) return Forbid();
-            int docGiumId = int.Parse(docGiumIdStr);
-
-            var list = await _db.PhieuMuons
-                .Where(x => x.DocGiaId == docGiumId)
-                .OrderByDescending(x => x.PhieuMuonId)
-                .ToListAsync();
-
-            return View(list);
-        }
     }
 }

@@ -6,7 +6,7 @@ using WebApplication1.Models;
 namespace WebApplication1.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    
     public class PhieuMuonController : Controller
     {
         private readonly QuanLyThuVienContext _db;
@@ -70,12 +70,26 @@ namespace WebApplication1.Areas.Admin.Controllers
         }
         public async Task<IActionResult> ChoDuyet()
         {
-            var list = await _db.PhieuMuons
-                .Include(x => x.DocGia)
-                .Where(x => x.TrangThai == "ChoDuyet")
-                .OrderBy(x => x.PhieuMuonId)
-                .ToListAsync();
-            return View(list);
+            var vm = new PhieuMuonChoDuyetVM
+            {
+                ChoDuyet = await _db.PhieuMuons
+                    .Include(x => x.DocGia)
+                    .Where(x => x.TrangThai == "ChoDuyet")
+                    .OrderBy(x => x.PhieuMuonId)
+                    .ToListAsync(),
+
+                LichSu = await _db.PhieuMuons
+                    .Include(x => x.DocGia)
+                    .Where(x =>
+                        x.TrangThai == "DaTra" ||
+                        x.TrangThai == "TuChoi"
+                    )
+                    .OrderByDescending(x => x.PhieuMuonId)
+                    .Take(10) // lấy 10 phiếu gần nhất
+                    .ToListAsync()
+            };
+
+            return View(vm);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -94,6 +108,21 @@ namespace WebApplication1.Areas.Admin.Controllers
             return View(phieu);
         }
 
+        public async Task<IActionResult> Details1(int id)
+        {
+            var phieu = await _db.PhieuMuons
+                .Include(x => x.DocGia)
+                .FirstOrDefaultAsync(x => x.PhieuMuonId == id);
+            if (phieu == null) return NotFound();
+
+            var ct = await _db.CtPhieuMuons
+                .Include(x => x.Sach).ThenInclude(s => s.DauSach)
+                .Where(x => x.PhieuMuonId == id)
+                .ToListAsync();
+
+            ViewBag.CT = ct;
+            return View(phieu);
+        }
         [HttpPost]
         public async Task<IActionResult> Approve(int id, int soNgayMuon = 7)
         {

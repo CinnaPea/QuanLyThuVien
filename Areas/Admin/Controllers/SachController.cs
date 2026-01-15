@@ -9,7 +9,7 @@ using WebApplication1.VMs;
 namespace WebApplication1.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+   
     public class SachController : Controller
     {
         private readonly QuanLyThuVienContext _db;
@@ -80,14 +80,21 @@ namespace WebApplication1.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var exists = await _db.Saches.AnyAsync(x => x.SachId == id);
-            if (!exists) return NotFound();
+            var entity = await _db.Saches.FindAsync(id);
+            if (entity == null) return NotFound();
 
-            _db.Saches.Update(model);
+            // cập nhật từng field
+            entity.DauSachId = model.DauSachId;
+            entity.SachId = model.SachId;
+            entity.TinhTrang = model.TinhTrang;   // ⭐ QUAN TRỌNG
+            entity.GhiChu = model.GhiChu;
+
             await _db.SaveChangesAsync();
+
             TempData["ok"] = "Đã cập nhật sách bản sao.";
             return RedirectToAction(nameof(Index));
         }
+
 
 
         [HttpPost]

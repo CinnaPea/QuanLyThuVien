@@ -7,7 +7,7 @@ using WebApplication1.VMs;
 namespace WebApplication1.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    
     public class AdminController : Controller
     {
         private readonly IDashboardService _dashboardService;

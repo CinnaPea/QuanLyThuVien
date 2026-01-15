@@ -1,0 +1,164 @@
+﻿@model WebApplication1.Models.PhieuMuon
+@{
+    ViewData["Title"] = "Chi tiết phiếu mượn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="mb-4">
+
+        <!-- NÚT QUAY LẠI -->
+        <a asp-action="Index" class="btn btn-back mb-3">
+            ⬅ Quay lại
+        </a>
+
+        <!-- TIÊU ĐỀ -->
+        <h3 class="fw-bold text-white mb-1">
+            📄 Phiếu mượn #@Model.PhieuMuonId
+        </h3>
+
+        <p class="text-muted mb-0">
+            Chi tiết sách trong phiếu mượn của bạn
+        </p>
+
+    </div>
+
+
+    <!-- THÔNG TIN PHIẾU -->
+    <div class="card bg-dark text-white shadow-sm mb-4 rounded-4">
+        <div class="card-body">
+
+            <div class="borrow-info">
+
+                <!-- Ngày mượn -->
+                <div>
+                    <div class="text-muted small mb-1">Ngày mượn</div>
+                    <div class="fw-semibold fs-6">
+                        @Model.NgayMuon.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+
+                <!-- Hạn trả -->
+                <div>
+                    <div class="text-muted small mb-1">Hạn trả</div>
+                    <div class="fw-semibold fs-6">
+                        @Model.HanTra.ToString("dd/MM/yyyy")
+                    </div>
+                </div>
+
+                <!-- Trạng thái -->
+                <div>
+                    <div class="text-muted small mb-2">Trạng thái</div>
+
+                    @switch (Model.TrangThai)
+                    {
+                        case "ChoDuyet":
+                            <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
+                                Chờ duyệt
+                            </span>
+                            break;
+                        case "DangMuon":
+                            <span class="badge rounded-pill bg-primary px-3 py-2">
+                                Đang mượn
+                            </span>
+                            break;
+                        case "DaTra":
+                            <span class="badge rounded-pill bg-success px-3 py-2">
+                                Đã trả
+                            </span>
+                            break;
+                        default:
+                            <span class="badge rounded-pill bg-secondary px-3 py-2">
+                                @Model.TrangThai
+                            </span>
+                            break;
+                    }
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <!-- DANH SÁCH SÁCH -->
+    <div class="card bg-dark text-white shadow-sm rounded-4">
+        <div class="card-header border-0 pb-0">
+            <h5 class="fw-bold mb-0">📚 Danh sách sách mượn</h5>
+        </div>
+
+        <div class="card-body pt-3">
+            @if (!Model.CtPhieuMuons.Any())
+            {
+                <div class="alert alert-info bg-opacity-10 text-white border-0">
+                    Phiếu mượn chưa có sách.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead class="text-muted">
+                            <tr>
+                                <th style="width:60px">#</th>
+                                <th>Đầu sách</th>
+                                <th style="width:160px">Mã sách</th>
+                                <th style="width:160px">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int i = 1;
+                            }
+                            @foreach (var ct in Model.CtPhieuMuons)
+                            {
+                                <tr>
+                                    <td>@i</td>
+                                    <td>
+                                        <div class="fw-semibold">
+                                            @ct.Sach?.DauSach?.TieuDe
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-info">
+                                            @ct.Sach?.SachId
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @switch (ct.Sach?.TinhTrang)
+                                        {
+                                            case "DangMuon":
+                                                <span class="badge rounded-pill bg-primary">
+                                                    Đang mượn
+                                                </span>
+                                                break;
+                                            case "Con":
+                                                <span class="badge rounded-pill bg-success">
+                                                    Còn
+                                                </span>
+                                                break;
+                                            case "HuHong":
+                                                <span class="badge rounded-pill bg-danger">
+                                                    Hư hỏng
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="badge rounded-pill bg-secondary">
+                                                    @ct.Sach?.TinhTrang
+                                                </span>
+                                                break;
+                                        }
+                                    </td>
+                                </tr>
+                                i++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

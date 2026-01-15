@@ -7,7 +7,7 @@ using WebApplication1.Models;
 namespace WebApplication1.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+  
     public class TacGiaController : Controller
     {
         private readonly QuanLyThuVienContext _db;

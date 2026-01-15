@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using WebApplication1.Models; 
+using WebApplication1.Models;
+
 namespace LibraryManagement.Controllers
 {
     public class AccountController : Controller
@@ -13,75 +11,56 @@ namespace LibraryManagement.Controllers
         private readonly QuanLyThuVienContext _db;
         public AccountController(QuanLyThuVienContext db) => _db = db;
 
+        // ================= LOGIN =================
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public IActionResult Login()
         {
-            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string tenDangNhap, string matKhau, string? returnUrl = null)
+        public async Task<IActionResult> Login(string tenDangNhap, string matKhau)
         {
-            ViewBag.ReturnUrl = returnUrl;
-
-            // Lưu ý: nếu DB bạn đang lưu plaintext thì đổi so sánh cho phù hợp.
             var passHash = Sha256(matKhau);
 
-            var tk = await _db.TaiKhoans
+            var tk = await _db.TaiKhoans.Include(x=> x.DocGia)
                 .Include(x => x.VaiTro)
                 .FirstOrDefaultAsync(x => x.TenDangNhap == tenDangNhap);
 
-            if (tk == null)
+            if (tk == null ||
+    !string.Equals(tk.MatKhauHash, passHash, StringComparison.OrdinalIgnoreCase))
             {
                 ViewBag.Error = "Sai tài khoản hoặc mật khẩu.";
                 return View();
             }
 
-            // Nếu bạn đang lưu plaintext thì dùng: tk.MatKhauHash == matKhau
-            if (!string.Equals(tk.MatKhauHash, passHash, StringComparison.OrdinalIgnoreCase))
-            {
-                ViewBag.Error = "Sai tài khoản hoặc mật khẩu.";
-                return View();
-            }
+            var role = tk.VaiTro?.TenVaiTro ?? "User";
 
-            var roleName = tk.VaiTro?.TenVaiTro ?? "User";
+            // ===== LƯU SESSION =====
+            HttpContext.Session.SetInt32("TAIKHOAN_ID", tk.TaiKhoanId);
+            HttpContext.Session.SetString("USERNAME", tk.TenDangNhap);
+            HttpContext.Session.SetString("ROLE", role);
 
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, tk.TaiKhoanId.ToString()),
-                new Claim(ClaimTypes.Name, tk.TenDangNhap),
-                new Claim(ClaimTypes.Role, roleName),
-            };
-
-            // Nếu tài khoản có DocGiaId
             if (tk.DocGiaId.HasValue)
-                claims.Add(new Claim("DocGiaId", tk.DocGiaId.Value.ToString()));
+                HttpContext.Session.SetInt32("DOCGIA_ID", tk.DocGiaId.Value);
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(identity));
-
-            // Điều hướng
-            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-
-            if (roleName.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            // ===== ĐIỀU HƯỚNG =====
+            if (role == "Admin")
                 return RedirectToAction("Index", "Admin", new { area = "Admin" });
 
             return RedirectToAction("Index", "Home");
         }
 
+
+        // ================= LOGOUT =================
         [HttpPost]
-        public async Task<IActionResult> Logout()
+        public IActionResult Logout()
         {
-            await HttpContext.SignOutAsync();
             HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+            return RedirectToAction("Index", "Home");
         }
 
-        // ========== REGISTER ==========
+        // ================= REGISTER =================
         [HttpGet]
         public IActionResult Register()
         {
@@ -89,13 +68,20 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(string tenDangNhap, string matKhau, string xacNhanMatKhau,
-                                                 string hoTen, string? email, string? dienThoai, string? diaChi)
+        public async Task<IActionResult> Register(
+            string tenDangNhap,
+            string matKhau,
+            string xacNhanMatKhau,
+            string hoTen,
+            string? email,
+            string? dienThoai,
+            string? diaChi)
         {
-            // basic validate
-            if (string.IsNullOrWhiteSpace(tenDangNhap) || string.IsNullOrWhiteSpace(matKhau) || string.IsNullOrWhiteSpace(hoTen))
+            if (string.IsNullOrWhiteSpace(tenDangNhap) ||
+                string.IsNullOrWhiteSpace(matKhau) ||
+                string.IsNullOrWhiteSpace(hoTen))
             {
-                ViewBag.Error = "Vui lòng nhập đầy đủ Tên đăng nhập, Mật khẩu và Họ tên.";
+                ViewBag.Error = "Vui lòng nhập đầy đủ thông tin.";
                 return View();
             }
 
@@ -105,32 +91,33 @@ namespace LibraryManagement.Controllers
                 return View();
             }
 
-            // check username exists
             var exists = await _db.TaiKhoans.AnyAsync(x => x.TenDangNhap == tenDangNhap);
             if (exists)
             {
-                ViewBag.Error = "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.";
+                ViewBag.Error = "Tên đăng nhập đã tồn tại.";
                 return View();
             }
 
-            // 1) Create DocGia
+            // 1. Tạo Độc Giả
             var docGia = new DocGium
             {
                 HoTen = hoTen,
                 Email = email,
                 DienThoai = dienThoai,
-                DiaChi = diaChi
+                DiaChi = diaChi,
+                TrangThai = true,
+                NgayDangKy = DateOnly.FromDateTime(DateTime.Now)
             };
 
             _db.DocGia.Add(docGia);
-            await _db.SaveChangesAsync(); // lấy DocGiaId
+            await _db.SaveChangesAsync();
 
-            // 2) Create TaiKhoan
+            // 2. Tạo Tài Khoản (User)
             var tk = new TaiKhoan
             {
                 TenDangNhap = tenDangNhap,
                 MatKhauHash = Sha256(matKhau),
-                VaiTroId = 2, // User role
+                VaiTroId = 2, // USER
                 TrangThai = true,
                 DocGiaId = docGia.DocGiaId
             };
@@ -138,16 +125,17 @@ namespace LibraryManagement.Controllers
             _db.TaiKhoans.Add(tk);
             await _db.SaveChangesAsync();
 
-            // auto login (session)
-            HttpContext.Session.SetString("DOCGIA_ID", docGia.DocGiaId.ToString());
-            HttpContext.Session.SetString("ROLE", "User");
+            // 3. Auto login bằng SESSION
+            HttpContext.Session.SetInt32("TAIKHOAN_ID", tk.TaiKhoanId);
             HttpContext.Session.SetString("USERNAME", tenDangNhap);
+            HttpContext.Session.SetString("ROLE", "User");
+            HttpContext.Session.SetInt32("DOCGIA_ID", docGia.DocGiaId);
 
-            TempData["SuccessMessage"] = "Đăng ký thành công! Bạn đã đăng nhập.";
+            TempData["SuccessMessage"] = "Đăng ký thành công!";
             return RedirectToAction("Index", "Home");
         }
-        public IActionResult AccessDenied() => View();
 
+        // ================= HASH =================
         private static string Sha256(string input)
         {
             using var sha = SHA256.Create();

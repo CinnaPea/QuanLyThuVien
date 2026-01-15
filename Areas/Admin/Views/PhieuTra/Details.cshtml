@@ -1,0 +1,57 @@
+﻿@model WebApplication1.Models.PhieuTra
+
+@{
+    ViewData["Title"] = "Chi tiết phiếu trả";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var ct = ViewBag.CT as List<WebApplication1.Models.CtPhieuTra> ?? new();
+}
+
+<h2>📄 Chi tiết phiếu trả #@Model.PhieuTraId</h2>
+
+<hr />
+
+<h4>Thông tin phiếu trả</h4>
+<ul>
+    <li><b>Phiếu mượn:</b> #@Model.PhieuMuonId</li>
+    <li><b>Độc giả:</b> @Model.PhieuMuon?.DocGia?.HoTen</li>
+    <li><b>Ngày trả:</b> @Model.NgayTra.ToString("dd/MM/yyyy HH:mm")</li>
+</ul>
+
+<hr />
+
+<h4>📚 Sách trong phiếu trả</h4>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Mã sách</th>
+            <th>Tên sách</th>
+            <th>Tình trạng lúc trả</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var x in ct)
+        {
+            <tr>
+                <td>@x.SachId</td>
+                <td>@x.Sach?.DauSach?.TieuDe</td>
+                <td>
+                    @if (x.TinhTrangLucTra == "Con")
+                    {
+                        <span class="badge bg-success">Còn</span>
+                    }
+                    else if (x.TinhTrangLucTra == "HuHong")
+                    {
+                        <span class="badge bg-warning text-dark">Hư hỏng</span>
+                    }
+                    else if (x.TinhTrangLucTra == "Mat")
+                    {
+                        <span class="badge bg-danger">Mất sách</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary mt-3">⬅ Quay lại</a>
