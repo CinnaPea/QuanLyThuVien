@@ -1,50 +1,173 @@
 ﻿@model WebApplication1.Models.PhieuMuon
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Chi tiết phiếu mượn";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var ct = ViewBag.CT as List<WebApplication1.Models.CtPhieuMuon> ?? new();
 }
 
-<h2>Chi tiết phiếu mượn #@Model.PhieuMuonId</h2>
+<div class="container-fluid mt-3">
 
-@if (TempData["err"] != null)
-{
-     <div style="color:red">@TempData["err"]</div>
-}
-@if (TempData["ok"] != null)
-{
-     <div style="color:green">@TempData["ok"]</div>
-}
+    <div class="card shadow-sm">
 
-<p>Độc giả: @Model.DocGia?.HoTen</p>
-<p>Ngày mượn: @Model.NgayMuon</p>
-<p>Hạn trả: @Model.HanTra</p>
-<p>Trạng thái: @Model.TrangThai</p>
+        <!-- HEADER -->
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">
+                📘 Chi tiết phiếu mượn #@Model.PhieuMuonId
+            </h5>
+        </div>
 
-<h3>Sách trong phiếu</h3>
-<table border="1" cellpadding="6">
-    <tr><th>Mã sách</th><th>Đầu sách</th><th>Tình trạng lúc mượn</th></tr>
-    @foreach (var x in ct)
-    {
-        <tr>
-            <td>@x.SachId</td>
-            <td>@x.Sach?.DauSach?.TieuDe</td>
-            <td>@x.TinhTrangLucMuon</td>
-        </tr>
-    }
-</table>
+        <!-- NÚT QUAY LẠI -->
+        <div class="card-body border-bottom">
+            <a asp-action="ChoDuyet"
+               class="btn btn-outline-secondary">
+                ⬅ Quay lại danh sách chờ duyệt
+            </a>
+        </div>
 
-<form method="post" asp-action="Approve">
-    <input type="hidden" name="id" value="@Model.PhieuMuonId" />
-    <label>Số ngày mượn</label>
-    <input name="soNgayMuon" value="7" />
-    <button type="submit">Duyệt & Giao sách</button>
-</form>
+        <div class="card-body">
 
-<form method="post" asp-action="Reject">
-    <input type="hidden" name="id" value="@Model.PhieuMuonId" />
-    <label>Ghi chú</label>
-    <input name="ghiChu" />
-    <button type="submit">Từ chối</button>
-</form>
+            @if (TempData["err"] != null)
+            {
+                <div class="alert alert-danger">
+                    ❌ @TempData["err"]
+                </div>
+            }
+
+            @if (TempData["ok"] != null)
+            {
+                <div class="alert alert-success">
+                    ✅ @TempData["ok"]
+                </div>
+            }
+
+            <!-- THÔNG TIN PHIẾU -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>👤 Độc giả:</strong> @Model.DocGia?.HoTen</p>
+                    <p><strong>📅 Ngày mượn:</strong> @Model.NgayMuon.ToString("dd/MM/yyyy")</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>⏳ Hạn trả:</strong> @Model.HanTra.ToString("dd/MM/yyyy")</p>
+                    <p>
+                        <strong>📌 Trạng thái:</strong>
+                        <span class="badge
+                            @(Model.TrangThai == "ChoDuyet" ? "bg-warning text-dark" :
+                              Model.TrangThai == "DangMuon" ? "bg-primary" :
+                              Model.TrangThai == "DaTra" ? "bg-success" : "bg-secondary")">
+                            @Model.TrangThai
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- DANH SÁCH SÁCH -->
+            <h6 class="mb-3">📚 Danh sách sách trong phiếu</h6>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr class="text-center">
+                            <th style="width:120px">Mã sách</th>
+                            <th>Đầu sách</th>
+                            <th style="width:200px">Tình trạng lúc mượn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var x in ct)
+                        {
+                            <tr>
+                                <td class="text-center fw-bold">@x.SachId</td>
+                                <td>@x.Sach?.DauSach?.TieuDe</td>
+                                <td class="text-center">
+                                    <span class="badge bg-info text-dark">
+                                        @x.TinhTrangLucMuon
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <hr class="my-4" />
+
+            <!-- HÀNH ĐỘNG -->
+            <div class="row">
+
+                <!-- DUYỆT -->
+                <div class="col-md-6">
+                    <div class="card border-success mb-3">
+                        <div class="card-header bg-success text-white">
+                            ✔ Duyệt phiếu & giao sách
+                        </div>
+                        <div class="card-body">
+
+                            <form method="post" asp-action="Approve">
+                                <input type="hidden" name="id" value="@Model.PhieuMuonId" />
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">
+                                        📅 Số ngày mượn
+                                    </label>
+
+                                    <input type="number"
+                                           name="soNgayMuon"
+                                           value="7"
+                                           min="1"
+                                           class="form-control border-success bg-success-subtle"
+                                           style="max-width:120px;" />
+                                </div>
+
+                                <hr class="my-4" />
+
+                                <button type="submit"
+                                        class="btn btn-success w-100"
+                                        onclick="return confirm('Xác nhận duyệt và giao sách?');">
+                                    ✔ Duyệt & Giao sách
+                                </button>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TỪ CHỐI -->
+                <div class="col-md-6">
+                    <div class="card border-danger mb-3">
+                        <div class="card-header bg-danger text-white">
+                            ❌ Từ chối phiếu mượn
+                        </div>
+                        <div class="card-body">
+
+                            <form method="post" asp-action="Reject">
+                                <input type="hidden" name="id" value="@Model.PhieuMuonId" />
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">
+                                        📝 Ghi chú từ chối
+                                    </label>
+
+                                    <input name="ghiChu"
+                                           class="form-control border-danger bg-danger-subtle"
+                                           placeholder="Nhập lý do từ chối..." />
+                                </div>
+
+                                <hr class="my-4" />
+
+                                <button type="submit"
+                                        class="btn btn-danger w-100"
+                                        onclick="return confirm('Bạn chắc chắn muốn từ chối phiếu này?');">
+                                    ❌ Từ chối
+                                </button>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

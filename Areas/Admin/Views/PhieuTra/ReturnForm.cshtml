@@ -4,60 +4,89 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 
     var ct = ViewBag.CT as List<WebApplication1.Models.CtPhieuMuon> ?? new();
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Lập phiếu trả cho phiếu mượn #@Model.PhieuMuonId</h2>
+<div class="container-fluid mt-3">
 
-<p>Độc giả: <strong>@Model.DocGia?.HoTen</strong></p>
-<p>Hạn trả: <strong>@Model.HanTra</strong></p>
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                📄 Lập phiếu trả – Phiếu mượn #@Model.PhieuMuonId
+            </h5>
+        </div>
 
-<form method="post" asp-action="ReturnSelected">
+        <div class="card-body">
 
-    <input type="hidden" name="phieuMuonId" value="@Model.PhieuMuonId" />
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>👤 Độc giả:</strong>
+                    <span>@Model.DocGia?.HoTen</span>
+                </div>
+                <div class="col-md-6">
+                    <strong>📅 Hạn trả:</strong>
+                    <span>@Model.HanTra.ToString("dd/MM/yyyy")</span>
+                </div>
+            </div>
 
-    <table border="1" cellpadding="6" width="100%">
-        <tr>
-            <th>Chọn</th>
-            <th>Mã sách</th>
-            <th>Đầu sách</th>
-            <th>Tình trạng khi trả</th>
-        </tr>
+            <form method="post" asp-action="ReturnSelected">
 
-        @foreach (var x in ct.Where(c => c.NgayTraThucTe == null))
-        {
-            <tr>
-                <td align="center">
-                    <input type="checkbox"
-                           name="sachIds"
-                           value="@x.SachId"
-                           class="chk-sach"
-                           data-id="@x.SachId" />
-                </td>
+                <input type="hidden" name="phieuMuonId" value="@Model.PhieuMuonId" />
 
-                <td>@x.SachId</td>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th style="width: 80px">Chọn</th>
+                                <th style="width: 120px">Mã sách</th>
+                                <th>Đầu sách</th>
+                                <th style="width: 180px">Tình trạng khi trả</th>
+                            </tr>
+                        </thead>
 
-                <td>@x.Sach?.DauSach?.TieuDe</td>
+                        <tbody>
+                            @foreach (var x in ct.Where(c => c.NgayTraThucTe == null))
+                            {
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox"
+                                               class="form-check-input chk-sach"
+                                               name="sachIds"
+                                               value="@x.SachId"
+                                               data-id="@x.SachId" />
+                                    </td>
 
-                <td>
-                    <select name="tinhTrang_@x.SachId"
-                            class="tinh-trang"
-                            data-id="@x.SachId">
-                        <option value="Con">Còn</option>
-                        <option value="HuHong">Hư hỏng</option>
-                        <option value="Mat">Mất sách</option>
-                    </select>
-                </td>
-            </tr>
-        }
-    </table>
+                                    <td class="text-center fw-bold">
+                                        @x.SachId
+                                    </td>
 
-    <br />
+                                    <td>
+                                        @x.Sach?.DauSach?.TieuDe
+                                    </td>
 
-    <button type="submit">✔ Trả sách đã chọn</button>
-    <button type="submit" formaction="/Admin/PhieuTra/ReturnAll">
-        ✔ Trả tất cả
-    </button>
-</form>
+                                    <td>
+                                        <select name="tinhTrang_@x.SachId"
+                                                class="form-select tinh-trang"
+                                                data-id="@x.SachId">
+                                            <option value="Con">✔ Còn</option>
+                                            <option value="HuHong">⚠ Hư hỏng</option>
+                                            <option value="Mat">❌ Mất sách</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
 
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button type="submit" class="btn btn-success">
+                        ✔ Trả sách đã chọn
+                    </button>
 
+                    
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

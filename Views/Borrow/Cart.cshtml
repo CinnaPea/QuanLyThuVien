@@ -5,10 +5,12 @@
 }
 <link rel="stylesheet" href="~/css/library-home.css" />
 
-<div class="container" style="margin-top:20px;">
-    <div class="section-title" style="margin-bottom:12px;">
-        <h3>🧺 Giỏ mượn</h3>
-        <span class="muted">Chọn đầu sách, tăng/giảm số lượng rồi lập phiếu mượn</span>
+<div class="container cart-wrap">
+    <div class="cart-header">
+        <h3>🧺 Giỏ mượn sách</h3>
+        <p class="muted">
+            Chọn đầu sách, điều chỉnh số lượng và lập phiếu mượn
+        </p>
     </div>
 
     @if (TempData["Success"] != null)
@@ -22,27 +24,27 @@
 
     @if (Model.Items.Count == 0)
     {
-        <div class="empty">
-            <b>Giỏ mượn đang trống.</b>
-            <div class="muted">Vào trang Sách và bấm “Thêm vào giỏ”.</div>
-            <div style="margin-top:10px;">
-                <a class="btn primary" asp-controller="Book" asp-action="Index">📚 Xem sách</a>
-            </div>
+        <div class="empty-box">
+            <h5>📭 Giỏ mượn đang trống</h5>
+            <p class="muted">Hãy chọn sách để bắt đầu mượn.</p>
+            <a class="btn primary" asp-controller="Book" asp-action="Index">
+                📚 Xem danh sách sách
+            </a>
         </div>
     }
     else
     {
-        <div class="card">
+        <div class="card cart-card">
             <table class="cart-table">
                 <thead>
                     <tr>
-                        <th style="width:60px;">Chọn</th>
+                        <th>✓</th>
                         <th>Đầu sách</th>
-                        <th style="width:160px;">Thể loại</th>
-                        <th style="width:180px;">NXB</th>
-                        <th style="width:130px;">Còn mượn</th>
-                        <th style="width:220px;">Số lượng</th>
-                        <th style="width:110px;"></th>
+                        <th>Thể loại</th>
+                        <th>NXB</th>
+                        <th>Còn mượn</th>
+                        <th>Số lượng</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,7 +54,7 @@
                         var disableMinus = it.Qty <= 1;
 
                         <tr>
-                            <td>
+                            <td class="center">
                                 <form asp-controller="Borrow" asp-action="ToggleSelect" method="post">
                                     <input type="hidden" name="dauSachId" value="@it.DauSachId" />
                                     <input type="hidden" name="selected" value="@(it.Selected ? "false" : "true")" />
@@ -61,41 +63,49 @@
                             </td>
 
                             <td>
-                                <b>@it.TieuDe</b>
-                                @* <div class="muted" style="font-size:12px;">ID: @it.DauSachId</div> *@
+                                <div class="book-title">@it.TieuDe</div>
                             </td>
 
                             <td>@(it.TheLoai ?? "-")</td>
                             <td>@(it.NXB ?? "-")</td>
 
-                            <td>
+                            <td class="center">
                                 <span class="pill">@it.Available</span>
                             </td>
 
-                            <td>
-                                <div class="qty">
+                            <td class="center">
+                                <div class="qty-box">
                                     <form asp-controller="Borrow" asp-action="Minus" method="post">
                                         <input type="hidden" name="dauSachId" value="@it.DauSachId" />
-                                        <button class="qty-btn" type="submit" @(disableMinus ? "disabled" : "")>−</button>
+                                        <button class="qty-btn minus"
+                                                type="submit"
+                                        @(disableMinus ? "disabled" : "")>
+                                            −
+                                        </button>
                                     </form>
 
-                                    <div class="qty-num">@it.Qty</div>
+                                    <span class="qty-num">@it.Qty</span>
+                              
+
 
                                     <form asp-controller="Borrow" asp-action="Plus" method="post">
                                         <input type="hidden" name="dauSachId" value="@it.DauSachId" />
-                                        <button class="qty-btn" type="submit" @(disablePlus ? "disabled" : "")>+</button>
+                                        <button class="qty-btn plus"
+                                                type="submit"
+                                        @(disablePlus ? "disabled" : "")>
+                                            +
+                                        </button>
                                     </form>
-                                </div>
-
-                                <div class="muted" style="font-size:12px; margin-top:6px;">
-                                    Tối đa: @it.Available
                                 </div>
                             </td>
 
-                            <td class="text-right">
+                            <td class="right">
                                 <form asp-controller="Borrow" asp-action="Remove" method="post">
                                     <input type="hidden" name="dauSachId" value="@it.DauSachId" />
-                                    <button class="btn" type="submit">🗑 Xóa</button>
+                                    <button class="btn-delete" type="submit" title="Xóa sách khỏi giỏ">
+                                        🗑
+                                    </button>
+
                                 </form>
                             </td>
                         </tr>
@@ -104,18 +114,18 @@
             </table>
 
             <div class="cart-footer">
-                <div>
-                    <b>Tổng SL (đã chọn):</b> @Model.TotalSelectedQty
+                <div class="total">
+                    📦 Tổng số lượng đã chọn:
+                    <b>@Model.TotalSelectedQty</b>
                 </div>
 
-                <div style="display:flex; gap:10px; align-items:center;">
+                <div class="actions">
                     <form asp-controller="Borrow" asp-action="Clear" method="post">
-                        <button class="btn" type="submit">Xóa giỏ</button>
+                        <button class="btn">Xóa giỏ</button>
                     </form>
 
-                    <form asp-controller="Borrow" asp-action="CreateBorrowSlip" method="post" style="display:flex; gap:10px; align-items:center;">
-                       
-                        <button class="btn primary" type="submit">🧾 Lập phiếu mượn</button>
+                    <form asp-controller="Borrow" asp-action="CreateBorrowSlip" method="post">
+                        <button class="btn primary">🧾 Lập phiếu mượn</button>
                     </form>
                 </div>
             </div>
@@ -124,6 +134,20 @@
 </div>
 
 <style>
+    .cart-wrap {
+        margin-top: 24px;
+        max-width: 1200px;
+    }
+
+    .cart-header h3 {
+        margin-bottom: 4px;
+    }
+
+    .muted {
+        opacity: .7;
+        font-size: 14px;
+    }
+
     .alert {
         padding: 12px 14px;
         border-radius: 12px;
@@ -140,52 +164,162 @@
             border: 1px solid rgba(239,68,68,.3);
         }
 
+    .empty-box {
+        text-align: center;
+        padding: 40px;
+        border-radius: 16px;
+        background: rgba(255,255,255,.03);
+    }
+
+    .cart-card {
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
     .cart-table {
         width: 100%;
         border-collapse: collapse;
     }
 
-        .cart-table th, .cart-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid rgba(255,255,255,.08);
-            vertical-align: middle;
+        .cart-table th {
+            background: rgba(255,255,255,.04);
+            font-weight: 600;
+            font-size: 14px;
         }
 
-    .qty {
+        .cart-table th,
+        .cart-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+    .book-title {
+        font-weight: 600;
+    }
+
+    .center {
+        text-align: center;
+    }
+
+    .right {
+        text-align: right;
+    }
+
+    .pill {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(59,130,246,.15);
+        font-size: 13px;
+    }
+
+    /* ===== SỐ LƯỢNG ===== */
+    .qty-box {
         display: flex;
-        gap: 10px;
         align-items: center;
+        justify-content: center;
+        gap: 10px;
     }
 
     .qty-btn {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        border: 1px solid rgba(255,255,255,.15);
-        background: transparent;
-        color: inherit;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: none;
         font-size: 18px;
+        font-weight: 700;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .15s ease;
     }
 
+        .qty-btn.minus {
+            background: rgba(249,115,22,.15);
+            color: #f97316;
+        }
+
+            .qty-btn.minus:hover:not(:disabled) {
+                background: #f97316;
+                color: #fff;
+            }
+
+        .qty-btn.plus {
+            background: rgba(34,197,94,.18);
+            color: #22c55e;
+        }
+
+            .qty-btn.plus:hover:not(:disabled) {
+                background: #22c55e;
+                color: #fff;
+            }
+
         .qty-btn:disabled {
-            opacity: .45;
+            opacity: .35;
             cursor: not-allowed;
         }
 
     .qty-num {
-        min-width: 34px;
+        min-width: 30px;
         text-align: center;
         font-weight: 700;
+        font-size: 15px;
     }
 
+    /* ===== FOOTER ===== */
     .cart-footer {
         display: flex;
         justify-content: space-between;
-        padding: 14px 10px;
+        align-items: center;
+        padding: 16px 20px;
+        background: rgba(255,255,255,.03);
     }
 
-    .text-right {
-        text-align: right;
+    .actions {
+        display: flex;
+        gap: 10px;
     }
+
+    .btn {
+        padding: 8px 14px;
+        border-radius: 10px;
+    }
+
+        .btn.primary {
+            background: #22c55e;
+            color: #fff;
+        }
+
+        .btn.danger-outline {
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            background: transparent;
+        }
+
+    .btn-delete {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        border: 1px solid rgba(239,68,68,.35);
+        background: rgba(239,68,68,.12);
+        color: #ef4444;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(239,68,68,.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-delete:active {
+            transform: scale(.95);
+        }
+
 </style>

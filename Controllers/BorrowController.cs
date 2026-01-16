@@ -169,6 +169,7 @@ namespace WebApplication1.Controllers
             return RedirectToAction("Cart");
         }
 
+
         // ===== xóa hết =====
         [HttpPost]
         public IActionResult Clear()
@@ -182,7 +183,6 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBorrowSlip(int soNgayMuon = 7)
         {
-            // ===== CHECK LOGIN + ROLE =====
             var role = HttpContext.Session.GetString("ROLE");
             if (role != "User")
             {
@@ -197,10 +197,8 @@ namespace WebApplication1.Controllers
                 return RedirectToAction("Cart");
             }
 
-            // ===== GIỎ =====
             var cart = GetCart();
             var selectedItems = cart.Where(x => x.Selected && x.Qty > 0).ToList();
-
             if (!selectedItems.Any())
             {
                 TempData["Error"] = "Bạn chưa chọn đầu sách nào.";
@@ -209,7 +207,6 @@ namespace WebApplication1.Controllers
 
             if (soNgayMuon < 1) soNgayMuon = 7;
 
-            // ===== TẠO PHIẾU =====
             var phieu = new PhieuMuon
             {
                 DocGiaId = docGiaId.Value,
@@ -221,7 +218,7 @@ namespace WebApplication1.Controllers
             _db.PhieuMuons.Add(phieu);
             await _db.SaveChangesAsync();
 
-            // ===== TẠO CHI TIẾT =====
+            // ===== CHỐT SÁCH + GIỮ SÁCH =====
             foreach (var it in selectedItems)
             {
                 var books = await _db.Saches
@@ -241,20 +238,22 @@ namespace WebApplication1.Controllers
                     _db.CtPhieuMuons.Add(new CtPhieuMuon
                     {
                         PhieuMuonId = phieu.PhieuMuonId,
-                        SachId = sach.SachId
+                        SachId = sach.SachId,
+                        TinhTrangLucMuon = sach.TinhTrang
                     });
 
-                   // sach.TinhTrang = "DangMuon";
+                    // ⭐ GIỮ SÁCH
+                    sach.TinhTrang = "DatTruoc";
                 }
             }
 
             await _db.SaveChangesAsync();
 
-            // ===== XÓA DÒNG ĐÃ CHỌN =====
+            // ===== XÓA ITEM ĐÃ TẠO PHIẾU =====
             cart = cart.Where(x => !x.Selected).ToList();
             SaveCart(cart);
 
-            TempData["Success"] = $"Đã lập phiếu mượn #{phieu.PhieuMuonId}.";
+            TempData["Success"] = $"✅ Đã lập phiếu mượn #{phieu.PhieuMuonId}.";
             return RedirectToAction("Cart");
         }
 

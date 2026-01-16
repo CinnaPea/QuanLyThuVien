@@ -147,42 +147,44 @@ namespace WebApplication1.Areas.Admin.Controllers
 
             var phieu = await _db.PhieuMuons
                 .Include(p => p.CtPhieuMuons)
+                .ThenInclude(ct => ct.Sach)
                 .FirstOrDefaultAsync(p => p.PhieuMuonId == id);
 
             if (phieu == null) return NotFound();
+
             if (phieu.TrangThai != "ChoDuyet")
             {
                 TempData["err"] = "Phiếu không ở trạng thái chờ duyệt.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
-            var sachIds = phieu.CtPhieuMuons.Select(x => x.SachId).Distinct().ToList();
-            var saches = await _db.Saches.Where(s => sachIds.Contains(s.SachId)).ToListAsync();
-
-            if (saches.Any(s => s.TinhTrang != "Con"))
+            // ✅ Kiểm tra sách có còn đang được GIỮ cho phiếu này không
+            if (phieu.CtPhieuMuons.Any(ct => ct.Sach.TinhTrang != "DatTruoc"))
             {
-                TempData["err"] = "Có bản sao không còn khả dụng. Không thể duyệt.";
+                TempData["err"] = "Có bản sao không còn ở trạng thái giữ chỗ. Không thể duyệt.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
-            // set hạn trả + trạng thái phiếu
+            if (soNgayMuon < 1) soNgayMuon = 7;
+
+            // ===== CẬP NHẬT PHIẾU =====
             phieu.TrangThai = "DangMuon";
             phieu.HanTra = DateOnly.FromDateTime(DateTime.Now.AddDays(soNgayMuon));
 
-            // giao sách: đổi trạng thái sách, và snapshot tình trạng lúc mượn
+            // ===== GIAO SÁCH =====
             foreach (var ct in phieu.CtPhieuMuons)
             {
-                var sach = saches.First(s => s.SachId == ct.SachId);
-                ct.TinhTrangLucMuon = sach.TinhTrang; // trước khi đổi (thường là "Con") :contentReference[oaicite:5]{index=5}
-                sach.TinhTrang = "DangMuon";           // :contentReference[oaicite:6]{index=6}
+                ct.TinhTrangLucMuon = ct.Sach.TinhTrang; // "DatTruoc"
+                ct.Sach.TinhTrang = "DangMuon";
             }
 
             await _db.SaveChangesAsync();
             await tx.CommitAsync();
 
-            TempData["ok"] = "Đã duyệt và giao sách.";
+            TempData["ok"] = "✅ Đã duyệt và giao sách.";
             return RedirectToAction(nameof(Details), new { id });
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Reject(int id, string? ghiChu = null)

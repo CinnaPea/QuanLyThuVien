@@ -68,7 +68,7 @@
                         <option value="">-- Tất cả --</option>
                         @foreach (var tl in theLoais)
                         {
-                            <option value="@tl.TheLoaiId" selected="@(theLoaiId == tl.TheLoaiId)">
+                            <option style="color : black" value="@tl.TheLoaiId" selected="@(theLoaiId == tl.TheLoaiId)">
                                 @tl.TenTheLoai
                             </option>
                         }
@@ -81,7 +81,7 @@
                         <option value="">-- Tất cả --</option>
                         @foreach (var nxb in nhaXuatBans)
                         {
-                            <option value="@nxb.NhaXuatBanId" selected="@(nhaXuatBanId == nxb.NhaXuatBanId)">
+                            <option style="color : black" value="@nxb.NhaXuatBanId" selected="@(nhaXuatBanId == nxb.NhaXuatBanId)">
                                 @nxb.TenNxb
                             </option>
                         }
@@ -94,7 +94,7 @@
                         <option value="">-- Tất cả --</option>
                         @foreach (var tg in tacGias)
                         {
-                            <option value="@tg.TacGiaId" selected="@(tacGiaId == tg.TacGiaId)">
+                            <option style="color : black" value="@tg.TacGiaId" selected="@(tacGiaId == tg.TacGiaId)">
                                 @tg.TenTacGia
                             </option>
                         }
