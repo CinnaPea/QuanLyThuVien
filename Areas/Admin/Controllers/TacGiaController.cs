@@ -92,13 +92,45 @@ namespace WebApplication1.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var item = await _db.TacGia.FindAsync(id);
-            if (item == null) return NotFound();
-            _db.TacGia.Remove(item);
-            await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            await using var tx = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                var tg = await _db.TacGia.FindAsync(id);
+                if (tg == null) return NotFound();
+
+                // 1) Remove many-to-many links first (DauSach_TacGia)
+                var links = await _db.DauSachTacGia
+                    .Where(x => x.TacGiaId == id)
+                    .ToListAsync();
+
+                if (links.Count > 0)
+                    _db.DauSachTacGia.RemoveRange(links);
+
+                // 2) Now delete the author
+                _db.TacGia.Remove(tg);
+
+                await _db.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                TempData["ok"] = "Đã xoá tác giả (và gỡ liên kết với các đầu sách).";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException ex)
+            {
+                await tx.RollbackAsync();
+                TempData["err"] = "Xoá thất bại do ràng buộc dữ liệu (FK). " + ex.GetBaseException().Message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                await tx.RollbackAsync();
+                TempData["err"] = ex.GetBaseException().Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
+
     }
 }

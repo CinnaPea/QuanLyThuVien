@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using WebApplication1.Models;
 using System.Security.Cryptography;
 using WebApplication1.VMs;
@@ -95,17 +96,80 @@ namespace WebApplication1.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var item = await _db.Saches.FindAsync(id);
-            if (item == null) return NotFound();
-            _db.Saches.Remove(item);
-            await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            // id = SachId
+            await using var tx = await _db.Database.BeginTransactionAsync();
+
+            try
+            {
+                var sach = await _db.Saches.FindAsync(id);
+                if (sach == null) return NotFound();
+
+                // 1) Phat -> ThanhToanPhat (FK_ThanhToanPhat_Phat)
+                var phatIds = await _db.Phats
+                    .Where(p => p.SachId == id)
+                    .Select(p => p.PhatId)
+                    .ToListAsync();
+
+                if (phatIds.Count > 0)
+                {
+                    var thanhToans = await _db.ThanhToanPhats
+                        .Where(t => phatIds.Contains(t.PhatId))
+                        .ToListAsync();
+
+                    if (thanhToans.Count > 0)
+                        _db.ThanhToanPhats.RemoveRange(thanhToans);
+
+                    var phats = await _db.Phats
+                        .Where(p => p.SachId == id)
+                        .ToListAsync();
+
+                    if (phats.Count > 0)
+                        _db.Phats.RemoveRange(phats);
+                }
+
+                // 2) CT_PhieuMuon (FK_CTPM_Sach)
+                var ctpm = await _db.CtPhieuMuons
+                    .Where(x => x.SachId == id)
+                    .ToListAsync();
+
+                if (ctpm.Count > 0)
+                    _db.CtPhieuMuons.RemoveRange(ctpm);
+
+                // 3) CT_PhieuTra (FK_CTPT_Sach)
+                var ctpt = await _db.CtPhieuTras
+                    .Where(x => x.SachId == id)
+                    .ToListAsync();
+
+                if (ctpt.Count > 0)
+                    _db.CtPhieuTras.RemoveRange(ctpt);
+
+                // 4) Finally delete Sach
+                _db.Saches.Remove(sach);
+
+                await _db.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                TempData["ok"] = "Đã xoá sách bản sao (và toàn bộ dữ liệu liên quan).";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException ex)
+            {
+                await tx.RollbackAsync();
+                TempData["err"] = ex.GetBaseException().Message; // show real FK if any remains
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                await tx.RollbackAsync();
+                TempData["err"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
+
 
         [HttpGet]
         public async Task<IActionResult> CreateBatch(int dauSachId)

@@ -88,14 +88,46 @@ namespace WebApplication1.Areas.Admin.Controllers
             TempData["ok"] = "Đã cập nhật thể loại.";
             return RedirectToAction(nameof(Index));
         }
+
+        //[HttpPost]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    var item = await _db.TheLoais.FindAsync(id);
+        //    if (item == null) return NotFound();
+        //    _db.TheLoais.Remove(item);
+        //    await _db.SaveChangesAsync();
+        //    return RedirectToAction(nameof(Index));
+        //}
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var item = await _db.TheLoais.FindAsync(id);
-            if (item == null) return NotFound();
-            _db.TheLoais.Remove(item);
-            await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            await using var tx = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                var theLoai = await _db.TheLoais.FindAsync(id);
+                if (theLoai == null) return NotFound();
+
+                // Detach: set DauSach.TheLoaiId = NULL
+                await _db.DauSaches
+                    .Where(ds => ds.TheLoaiId == id)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(ds => ds.TheLoaiId, (int?)null));
+
+                _db.TheLoais.Remove(theLoai);
+
+                await _db.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                TempData["ok"] = "Đã xoá thể loại. Các đầu sách liên quan đã được gán TheLoai = NULL.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                await tx.RollbackAsync();
+                TempData["err"] = ex.GetBaseException().Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
+
     }
 }

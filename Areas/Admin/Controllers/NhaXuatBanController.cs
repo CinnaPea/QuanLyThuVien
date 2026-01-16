@@ -54,13 +54,35 @@ namespace WebApplication1.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var item = await _db.NhaXuatBans.FindAsync(id);
-            if (item == null) return NotFound();
-            _db.NhaXuatBans.Remove(item);
-            await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            await using var tx = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                var nxb = await _db.NhaXuatBans.FindAsync(id);
+                if (nxb == null) return NotFound();
+
+                // Detach: set DauSach.NhaXuatBanId = NULL
+                await _db.DauSaches
+                    .Where(ds => ds.NhaXuatBanId == id)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(ds => ds.NhaXuatBanId, (int?)null));
+
+                _db.NhaXuatBans.Remove(nxb);
+
+                await _db.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                TempData["ok"] = "Đã xoá NXB. Các đầu sách liên quan đã được gán NhaXuatBan = NULL.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                await tx.RollbackAsync();
+                TempData["err"] = ex.GetBaseException().Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
+
     }
 }

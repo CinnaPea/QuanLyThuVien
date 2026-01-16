@@ -208,13 +208,71 @@ namespace WebApplication1.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var item = await _db.DauSaches.FindAsync(id);
-            if (item == null) return NotFound();
-            _db.DauSaches.Remove(item);
-            await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            // 1) Load DauSach
+            var dauSach = await _db.DauSaches
+                .FirstOrDefaultAsync(x => x.DauSachId == id);
+
+            if (dauSach == null) return NotFound();
+
+            await using var tx = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                // 2) Get all copies (Sach) under this DauSach
+                var sachIds = await _db.Saches
+                    .Where(s => s.DauSachId == id)
+                    .Select(s => s.SachId)
+                    .ToListAsync();
+
+                // 3) Delete borrow-detail rows that reference these SachIds (FK_CTPM_Sach)
+                // NOTE: rename DbSet if yours differs (CT_PhieuMuons / CTPhieuMuons / CT_PhieuMuon)
+                if (sachIds.Count > 0)
+                {
+                    var ctRows = await _db.CtPhieuMuons
+                        .Where(ct => sachIds.Contains(ct.SachId))
+                        .ToListAsync();
+
+                    if (ctRows.Count > 0)
+                        _db.CtPhieuMuons.RemoveRange(ctRows);
+                }
+
+                // 4) Delete copies Sach (FK_Sach_DauSach)
+                if (sachIds.Count > 0)
+                {
+                    var copies = await _db.Saches
+                        .Where(s => s.DauSachId == id)
+                        .ToListAsync();
+
+                    if (copies.Count > 0)
+                        _db.Saches.RemoveRange(copies);
+                }
+
+                // 5) Delete many-to-many links DauSach_TacGia (FK_DSTG_DauSach)
+                // NOTE: rename DbSet if yours differs (DauSachTacGias / DauSach_TacGia / DSTG)
+                var links = await _db.DauSachTacGia
+                    .Where(x => x.DauSachId == id)
+                    .ToListAsync();
+
+                if (links.Count > 0)
+                    _db.DauSachTacGia.RemoveRange(links);
+
+                // 6) Finally delete DauSach
+                _db.DauSaches.Remove(dauSach);
+
+                await _db.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                TempData["ok"] = "Đã xoá đầu sách + toàn bộ bản sao (Sach) + chi tiết phiếu mượn liên quan.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException)
+            {
+                await tx.RollbackAsync();
+                TempData["err"] = "Xoá thất bại do ràng buộc dữ liệu (FK). Kiểm tra các bảng liên quan trước khi xoá.";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }
