@@ -60,6 +60,7 @@ namespace WebApplication1.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> Edit(int id)
         {
             var item = await _db.Saches.FindAsync(id);
@@ -69,14 +70,26 @@ namespace WebApplication1.Areas.Admin.Controllers
             return View(item);
         }
 
-        [HttpPost]
+        [HttpPost("{id:int}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Sach model)
         {
             if (id != model.SachId) return BadRequest();
 
+            // parse DateOnly từ form (giữ như bạn đang làm)
+            DateOnly? parsedNgayNhap = null;
+            if (Request.Form.TryGetValue("NgayNhap", out var ngayNhapRaw) &&
+                !string.IsNullOrWhiteSpace(ngayNhapRaw))
+            {
+                if (DateOnly.TryParse(ngayNhapRaw.ToString(), out var d))
+                    parsedNgayNhap = d;
+                else
+                    ModelState.AddModelError(nameof(Sach.NgayNhap), "Ngày nhập không hợp lệ.");
+            }
+
             if (!ModelState.IsValid)
             {
+                TempData["err"] = "Form có lỗi. Hãy kiểm tra lại các trường nhập.";
                 LoadDauSachDropdown(model.DauSachId);
                 return View(model);
             }
@@ -84,17 +97,22 @@ namespace WebApplication1.Areas.Admin.Controllers
             var entity = await _db.Saches.FindAsync(id);
             if (entity == null) return NotFound();
 
-            // cập nhật từng field
             entity.DauSachId = model.DauSachId;
-            entity.SachId = model.SachId;
-            entity.TinhTrang = model.TinhTrang;   // ⭐ QUAN TRỌNG
-            entity.GhiChu = model.GhiChu;
+            entity.MaVach = model.MaVach?.Trim();     // khuyên dùng: không fallback về entity cũ
+            entity.ViTriKe = model.ViTriKe?.Trim();
+            entity.NgayNhap = parsedNgayNhap;
+            entity.TinhTrang = model.TinhTrang;
+            entity.GhiChu = model.GhiChu?.Trim();
 
-            await _db.SaveChangesAsync();
+            var affected = await _db.SaveChangesAsync();
 
-            TempData["ok"] = "Đã cập nhật sách bản sao.";
+            TempData["ok"] = affected > 0
+                ? "Đã cập nhật sách bản sao."
+                : "Không có thay đổi nào được ghi nhận.";
+
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
